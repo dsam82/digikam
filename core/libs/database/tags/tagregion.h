@@ -124,16 +124,16 @@ public:
     static QRectF absoluteToRelative(const QRect& region, const QSize& fullSize);
 
     /**
-     * When images is rotated, rectangles are off-position, adjust them using
-     * image's current size and rotation(left,right supported only)
+     * Rotate and flip region to MetaEngine::ImageOrientation
+     * The value region are calculated for the new image orientation
      */
-    static QRect ajustToRotatedImg(const QRect& region, const QSize& fullSize, int rotation);
+    static QSize adjustToOrientation(QRect& region, int orientation, const QSize& fullSize);
 
     /**
-     * When images is flipped, rectangles are off-position, adjust them using
-     * image's current size and flip(horizon,vertical supported only)
+     * Reverse rotate and flip region to MetaEngine::ImageOrientation
+     * The value region are calculated for the new image orientation
      */
-    static QRect ajustToFlippedImg(const QRect& region, const QSize& fullSize, int flip);
+    static void reverseToOrientation(QRect& region, int orientation, const QSize& fullSize);
 
 protected:
 

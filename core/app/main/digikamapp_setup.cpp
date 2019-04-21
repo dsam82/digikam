@@ -350,7 +350,7 @@ void DigikamApp::setupActions()
     d->openWithAction->setWhatsThis(i18n("Open the selected item with default assigned application."));
     connect(d->openWithAction, SIGNAL(triggered()), d->view, SLOT(slotFileWithDefaultApplication()));
     ac->addAction(QLatin1String("open_with_default_application"), d->openWithAction);
-    ac->setDefaultShortcut(d->openWithAction, Qt::META + Qt::Key_F4);
+    ac->setDefaultShortcut(d->openWithAction, Qt::CTRL + Qt::Key_F4);
 
     d->ieAction = new QAction(QIcon::fromTheme(QLatin1String("document-edit")), i18n("Image Editor"), this);
     d->ieAction->setWhatsThis(i18n("Open the image editor."));
@@ -362,7 +362,7 @@ void DigikamApp::setupActions()
     d->ltAction = new QAction(QIcon::fromTheme(QLatin1String("lighttable")), i18n("Light Table"), this);
     connect(d->ltAction, SIGNAL(triggered()), d->view, SLOT(slotLightTable()));
     ac->addAction(QLatin1String("light_table"), d->ltAction);
-    ac->setDefaultShortcut(d->ltAction, Qt::Key_L);
+    ac->setDefaultShortcut(d->ltAction, Qt::SHIFT + Qt::Key_L);
 
     d->imageLightTableAction = new QAction(QIcon::fromTheme(QLatin1String("lighttable")), i18n("Place onto Light Table"), this);
     d->imageLightTableAction->setWhatsThis(i18n("Place the selected items on the light table thumbbar."));
@@ -374,14 +374,14 @@ void DigikamApp::setupActions()
     d->imageAddLightTableAction->setWhatsThis(i18n("Add selected items to the light table thumbbar."));
     connect(d->imageAddLightTableAction, SIGNAL(triggered()), d->view, SLOT(slotImageAddToLightTable()));
     ac->addAction(QLatin1String("image_add_to_lighttable"), d->imageAddLightTableAction);
-    ac->setDefaultShortcut(d->imageAddLightTableAction, Qt::SHIFT + Qt::CTRL + Qt::Key_L);
+    ac->setDefaultShortcut(d->imageAddLightTableAction, Qt::CTRL + Qt::SHIFT + Qt::Key_L);
 
     // -----------------------------------------------------------
 
     d->bqmAction = new QAction(QIcon::fromTheme(QLatin1String("run-build")), i18n("Batch Queue Manager"), this);
     connect(d->bqmAction, SIGNAL(triggered()), d->view, SLOT(slotQueueMgr()));
     ac->addAction(QLatin1String("queue_manager"), d->bqmAction);
-    ac->setDefaultShortcut(d->bqmAction, Qt::Key_B);
+    ac->setDefaultShortcut(d->bqmAction, Qt::SHIFT + Qt::Key_B);
 
     d->imageAddCurrentQueueAction = new QAction(QIcon::fromTheme(QLatin1String("go-up")), i18n("Add to Current Queue"), this);
     d->imageAddCurrentQueueAction->setWhatsThis(i18n("Add selected items to current queue from batch manager."));
@@ -393,7 +393,7 @@ void DigikamApp::setupActions()
     d->imageAddNewQueueAction->setWhatsThis(i18n("Add selected items to a new queue from batch manager."));
     connect(d->imageAddNewQueueAction, SIGNAL(triggered()), d->view, SLOT(slotImageAddToNewQueue()));
     ac->addAction(QLatin1String("image_add_to_new_queue"), d->imageAddNewQueueAction);
-    ac->setDefaultShortcut(d->imageAddNewQueueAction, Qt::SHIFT + Qt::CTRL + Qt::Key_B);
+    ac->setDefaultShortcut(d->imageAddNewQueueAction, Qt::CTRL + Qt::SHIFT + Qt::Key_B);
 
     // -----------------------------------------------------------------
 
@@ -681,7 +681,7 @@ void DigikamApp::setupActions()
     d->zoomFitToWindowAction = new QAction(QIcon::fromTheme(QLatin1String("zoom-fit-best")), i18n("Fit to &Window"), this);
     connect(d->zoomFitToWindowAction, SIGNAL(triggered()), d->view, SLOT(slotFitToWindow()));
     ac->addAction(QLatin1String("album_zoomfit2window"), d->zoomFitToWindowAction);
-    ac->setDefaultShortcut(d->zoomFitToWindowAction, Qt::ALT + Qt::CTRL + Qt::Key_E);
+    ac->setDefaultShortcut(d->zoomFitToWindowAction, Qt::CTRL + Qt::ALT + Qt::Key_E);
 
     // -----------------------------------------------------------
 
@@ -856,17 +856,17 @@ void DigikamApp::setupAccelerators()
 
     QAction* const editTitles = new QAction(i18n("Edit Titles"), this);
     ac->addAction(QLatin1String("edit_titles"), editTitles);
-    ac->setDefaultShortcut(editTitles, Qt::META + Qt::Key_T);
+    ac->setDefaultShortcut(editTitles, Qt::ALT + Qt::SHIFT + Qt::Key_T);
     connect(editTitles, SIGNAL(triggered()), d->view, SLOT(slotRightSideBarActivateTitles()));
 
     QAction* const editComments = new QAction(i18n("Edit Comments"), this);
     ac->addAction(QLatin1String("edit_comments"), editComments);
-    ac->setDefaultShortcut(editComments, Qt::META + Qt::Key_C);
+    ac->setDefaultShortcut(editComments, Qt::ALT + Qt::SHIFT + Qt::Key_C);
     connect(editComments, SIGNAL(triggered()), d->view, SLOT(slotRightSideBarActivateComments()));
 
     QAction* const assignedTags = new QAction(i18n("Show Assigned Tags"), this);
-    ac->addAction(QLatin1String("assigned _tags"), assignedTags);
-    ac->setDefaultShortcut(assignedTags, Qt::META + Qt::Key_A);
+    ac->addAction(QLatin1String("assigned_tags"), assignedTags);
+    ac->setDefaultShortcut(assignedTags, Qt::ALT + Qt::SHIFT + Qt::Key_A);
     connect(assignedTags, SIGNAL(triggered()), d->view, SLOT(slotRightSideBarActivateAssignedTags()));
 }
 
@@ -970,14 +970,14 @@ void DigikamApp::setupImageTransformActions()
 
     QAction* const left = ac->addAction(QLatin1String("rotate_ccw"));
     left->setText(i18nc("rotate image left", "Left"));
-    ac->setDefaultShortcut(left, Qt::SHIFT + Qt::CTRL + Qt::Key_Left);
+    ac->setDefaultShortcut(left, Qt::CTRL + Qt::SHIFT + Qt::Key_Left);
     connect(left, SIGNAL(triggered(bool)),
             this, SLOT(slotTransformAction()));
     d->imageRotateActionMenu->addAction(left);
 
     QAction* const right = ac->addAction(QLatin1String("rotate_cw"));
     right->setText(i18nc("rotate image right", "Right"));
-    ac->setDefaultShortcut(right, Qt::SHIFT + Qt::CTRL + Qt::Key_Right);
+    ac->setDefaultShortcut(right, Qt::CTRL + Qt::SHIFT + Qt::Key_Right);
     connect(right, SIGNAL(triggered(bool)),
             this, SLOT(slotTransformAction()));
     d->imageRotateActionMenu->addAction(right);

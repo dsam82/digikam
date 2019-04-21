@@ -175,14 +175,45 @@ QProcessEnvironment adjustedEnvironmentForAppImage()
     {
         qCDebug(DIGIKAM_GENERAL_LOG) << "Adjusting environment variables for AppImage bundle";
 
-        env.insert(QLatin1String("LD_LIBRARY_PATH"),
-                   env.value(QLatin1String("APPIMAGE_ORIGINAL_LD_LIBRARY_PATH")));
-        env.insert(QLatin1String("QT_PLUGIN_PATH"),
-                   env.value(QLatin1String("APPIMAGE_ORIGINAL_QT_PLUGIN_PATH")));
-        env.insert(QLatin1String("XDG_DATA_DIRS"),
-                   env.value(QLatin1String("APPIMAGE_ORIGINAL_XDG_DATA_DIRS")));
-        env.insert(QLatin1String("PATH"),
-                   env.value(QLatin1String("APPIMAGE_ORIGINAL_PATH")));
+        if (!env.value(QLatin1String("APPIMAGE_ORIGINAL_LD_LIBRARY_PATH")).isEmpty())
+        {
+            env.insert(QLatin1String("LD_LIBRARY_PATH"),
+                       env.value(QLatin1String("APPIMAGE_ORIGINAL_LD_LIBRARY_PATH")));
+        }
+        else
+        {
+            env.remove(QLatin1String("LD_LIBRARY_PATH"));
+        }
+
+        if (!env.value(QLatin1String("APPIMAGE_ORIGINAL_QT_PLUGIN_PATH")).isEmpty())
+        {
+            env.insert(QLatin1String("QT_PLUGIN_PATH"),
+                       env.value(QLatin1String("APPIMAGE_ORIGINAL_QT_PLUGIN_PATH")));
+        }
+        else
+        {
+            env.remove(QLatin1String("QT_PLUGIN_PATH"));
+        }
+
+        if (!env.value(QLatin1String("APPIMAGE_ORIGINAL_XDG_DATA_DIRS")).isEmpty())
+        {
+            env.insert(QLatin1String("XDG_DATA_DIRS"),
+                       env.value(QLatin1String("APPIMAGE_ORIGINAL_XDG_DATA_DIRS")));
+        }
+        else
+        {
+            env.remove(QLatin1String("XDG_DATA_DIRS"));
+        }
+
+        if (!env.value(QLatin1String("APPIMAGE_ORIGINAL_PATH")).isEmpty())
+        {
+            env.insert(QLatin1String("PATH"),
+                       env.value(QLatin1String("APPIMAGE_ORIGINAL_PATH")));
+        }
+        else
+        {
+            env.remove(QLatin1String("PATH"));
+        }
     }
 
     return env;
@@ -231,6 +262,33 @@ void tryInitDrMingw()
     qCDebug(DIGIKAM_GENERAL_LOG) << "DrMinGw crash-file will be located at: " << logFile;
 
 #endif // HAVE_DRMINGW
+}
+
+QString toolButtonStyleSheet()
+{
+    return QLatin1String("QToolButton { padding: 1px; background-color: "
+                         "  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
+                         "  stop: 0 rgba(100, 100, 100, 50%), "
+                         "  stop: 1 rgba(170, 170, 170, 50%)); "
+                         "border: 1px solid rgba(170, 170, 170, 10%); } "
+
+                         "QToolButton:hover { border-color: white; } "
+
+                         "QToolButton:pressed { background-color: "
+                         "  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
+                         "  stop: 0 rgba(40, 40, 40, 50%), "
+                         "  stop: 1 rgba(90, 90, 90, 50%)); "
+                         "border-color: white; } "
+
+                         "QToolButton:checked { background-color: "
+                         "  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
+                         "  stop: 0 rgba(40, 40, 40, 50%), "
+                         "  stop: 1 rgba(90, 90, 90, 50%)); } "
+
+                         "QToolButton:disabled { background-color: "
+                         "  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
+                         "  stop: 0 rgba(40, 40, 40, 50%), "
+                         "  stop: 1 rgba(50, 50, 50, 50%)); }");
 }
 
 } // namespace Digikam

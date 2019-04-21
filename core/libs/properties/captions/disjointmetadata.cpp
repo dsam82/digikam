@@ -27,8 +27,8 @@
 // Qt includes
 
 #include <QMap>
-#include <QStringList>
 #include <QDateTime>
+#include <QStringList>
 #include <QMutexLocker>
 #include <QtAlgorithms>
 
@@ -54,7 +54,7 @@ class Q_DECL_HIDDEN DisjointMetadataDataFields
 public:
 
     DisjointMetadataDataFields()
-        : dateTimeChanged  (false),
+        : dateTimeChanged(false),
           titlesChanged(false),
           commentsChanged(false),
           pickLabelChanged(false),
@@ -188,32 +188,72 @@ DisjointMetadata& DisjointMetadata::operator=(const DisjointMetadata& other)
 void DisjointMetadata::reset()
 {
     delete d;
-    d =  new Private();
+    d = new Private();
 }
 
 void DisjointMetadata::load(const ItemInfo& info)
 {
+    Template metadataTemplate;
     CaptionsMap commentMap;
     CaptionsMap titleMap;
+    QDateTime dateTime;
+    int colorLabel;
+    int pickLabel;
+    int rating;
 
+    if (d->dateTimeStatus == MetadataDisjoint)
+        dateTime = d->dateTime;
+    else
+        dateTime = info.dateTime();
+
+    if (d->titlesStatus   == MetadataDisjoint &&
+        d->commentsStatus == MetadataDisjoint)
+    {
+        commentMap = d->comments;
+        titleMap   = d->titles;
+    }
+    else
     {
         CoreDbAccess access;
         ItemComments comments = info.imageComments(access);
-        commentMap             = comments.toCaptionsMap();
-        titleMap               = comments.toCaptionsMap(DatabaseComment::Title);
+        commentMap            = comments.toCaptionsMap();
+        titleMap              = comments.toCaptionsMap(DatabaseComment::Title);
     }
 
-    Template tref = info.metadataTemplate();
-    Template t    = TemplateManager::defaultManager()->findByContents(tref);
-    //qCDebug(DIGIKAM_GENERAL_LOG) << "Found Metadata Template: " << t.templateTitle();
+    if (d->colorLabelStatus == MetadataDisjoint)
+        colorLabel = d->colorLabel;
+    else
+        colorLabel = info.colorLabel();
 
-    load(info.dateTime(),
+    if (d->pickLabelStatus == MetadataDisjoint)
+        pickLabel = d->pickLabel;
+    else
+        pickLabel = info.pickLabel();
+
+    if (d->ratingStatus == MetadataDisjoint)
+        rating = d->rating;
+    else
+        rating = info.rating();
+
+    if (d->templateStatus == MetadataDisjoint)
+    {
+        metadataTemplate = d->metadataTemplate;
+    }
+    else
+    {
+        Template tref    = info.metadataTemplate();
+        Template t       = TemplateManager::defaultManager()->findByContents(tref);
+        //qCDebug(DIGIKAM_GENERAL_LOG) << "Found Metadata Template: " << t.templateTitle();
+        metadataTemplate = t.isNull() ? tref : t;
+    }
+
+    load(dateTime,
          titleMap,
          commentMap,
-         info.colorLabel(),
-         info.pickLabel(),
-         info.rating(),
-         t.isNull() ? tref : t);
+         colorLabel,
+         pickLabel,
+         rating,
+         metadataTemplate);
 
     loadTags(info.tagIds());
 }
@@ -577,14 +617,14 @@ void DisjointMetadata::load(const QDateTime& dateTime,const CaptionsMap& titles,
 {
     if (dateTime.isValid())
     {
-        d->loadSingleValue<QDateTime>(dateTime, d->dateTime,d->dateTimeStatus);
+        d->loadSingleValue<QDateTime>(dateTime, d->dateTime, d->dateTimeStatus);
     }
 
     d->loadSingleValue<int>(pickLabel, d->pickLabel, d->pickLabelStatus);
 
     d->loadSingleValue<int>(colorLabel, d->colorLabel, d->colorLabelStatus);
 
-    d->loadSingleValue<int>(rating, d->rating,d->ratingStatus);
+    d->loadSingleValue<int>(rating, d->rating, d->ratingStatus);
 
     d->loadSingleValue<CaptionsMap>(titles, d->titles, d->titlesStatus);
 

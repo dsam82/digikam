@@ -39,7 +39,8 @@ ChecksRunAsRoot
 StartScript
 ChecksCPUCores
 CentOS6Adjustments
-. /opt/rh/devtoolset-4/enable
+RegisterRemoteServers
+. /opt/rh/devtoolset-6/enable
 
 #################################################################################################
 
@@ -108,9 +109,6 @@ cmake3 -G "Unix Makefiles" .. \
       -DDIGIKAMSC_COMPILE_PO=ON \
       -DDIGIKAMSC_COMPILE_DOC=OFF \
       -DDIGIKAMSC_COMPILE_DIGIKAM=ON \
-      -DDIGIKAMSC_COMPILE_LIBKSANE=OFF \
-      -DDIGIKAMSC_COMPILE_LIBMEDIAWIKI=ON \
-      -DDIGIKAMSC_COMPILE_LIBKVKONTAKTE=OFF \
       -DENABLE_KFILEMETADATASUPPORT=OFF \
       -DENABLE_AKONADICONTACTSUPPORT=OFF \
       -DENABLE_MYSQLSUPPORT=ON \
@@ -118,7 +116,8 @@ cmake3 -G "Unix Makefiles" .. \
       -DENABLE_MEDIAPLAYER=ON \
       -DENABLE_DBUS=ON \
       -DENABLE_APPSTYLES=ON \
-      -DENABLE_QWEBENGINE=OFF \
+      -DENABLE_QWEBENGINE=$DK_QTWEBENGINE \
+      -DENABLE_FACESENGINE_DNN=ON \
       -DENABLE_KIO=OFF \
       -DENABLE_LEGACY=OFF \
       -Wno-dev
@@ -127,10 +126,6 @@ if [ $? -ne 0 ]; then
     echo "---------- Cannot configure digiKam $DK_VERSION."
     echo "---------- Aborting..."
     exit;
-fi
-
-if [ -d ./extra/libmediawiki/src ]; then
-    ln -sf src ./extra/libmediawiki/MediaWiki
 fi
 
 cat ../build/core/app/utils/digikam_version.h | grep "digikam_version\[\]" | awk '{print $6}' | tr -d '";' > $ORIG_WD/data/RELEASEID.txt

@@ -44,6 +44,7 @@
 #include "facetagseditor.h"
 #include "graphicsdimgview.h"
 #include "iteminfo.h"
+#include "metadatahub.h"
 #include "regionframeitem.h"
 #include "taggingaction.h"
 #include "itemvisibilitycontroller.h"
@@ -369,7 +370,7 @@ void FaceGroup::aboutToSetInfo(const ItemInfo& info)
         return;
     }
 
-    applyItemGeometryChanges();
+    //applyItemGeometryChanges();
     clear();
 }
 
@@ -654,12 +655,12 @@ void FaceGroup::clear()
 
 void FaceGroup::rejectAll()
 {
-    foreach (FaceItem* const item, d->items)
-    {
-        d->editPipeline.remove(d->info, item->face());
-        item->setFace(FaceTagsIface());
-        d->visibilityController->hideAndRemoveItem(item);
-    }
+    FaceTagsEditor().removeAllFaces(d->info.id());
+
+    MetadataHub hub;
+    hub.load(d->info);
+    hub.loadFaceTags(d->info, d->info.dimensions());
+    hub.write(d->info.filePath(), MetadataHub::WRITE_ALL);
 
     clear();
 }

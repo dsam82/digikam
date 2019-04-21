@@ -37,11 +37,11 @@ export OpenCVOptions='-DBUILD_EXAMPLES=OFF \
                       -DBUILD_opencv_objdetect=ON \
                       -DBUILD_opencv_calib3d=ON \
                       -DBUILD_opencv_features2d=ON \
-                      -DBUILD_opencv_photo=ON \
-                      -DBUILD_opencv_video=ON \
+                      -DBUILD_opencv_flann=ON \
+                      -DBUILD_opencv_photo=OFF \
                       -DBUILD_opencv_java=OFF \
                       -DBUILD_opencv_java_bindings_generator=OFF \
-                      -DBUILD_opencv_js=ON \
+                      -DBUILD_opencv_js=OFF \
                       -DBUILD_opencv_python2=OFF \
                       -DBUILD_opencv_python3=OFF \
                       -DBUILD_opencv_python_bindings_generator=OFF \
@@ -52,10 +52,10 @@ export OpenCVOptions='-DBUILD_EXAMPLES=OFF \
                       -DBUILD_opencv_stitching=OFF \
                       -DBUILD_opencv_videostab=OFF \
                       -DBUILD_opencv_videoio=OFF \
+                      -DBUILD_opencv_video=OFF \
                       -DBUILD_opencv_apps=OFF \
                       -DBUILD_opencv_dnn=OFF \
                       -DBUILD_opencv_gapi=OFF \
-                      -DBUILD_opencv_flann=OFF \
                       -DWITH_1394=OFF \
                       -DWITH_VTK=OFF \
                       -DWITH_DIRECTX=OFF \
@@ -70,6 +70,7 @@ export OpenCVOptions='-DBUILD_EXAMPLES=OFF \
                       -DWITH_MATLAB=OFF \
                       -DWITH_OPENEXR=OFF \
                       -DWITH_OPENNI=OFF \
+                      -DWITH_OPENMP=OFF \
                       -DWITH_PNG=OFF \
                       -DWITH_PVAPI=OFF \
                       -DWITH_WIN32UI=OFF \

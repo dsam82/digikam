@@ -6,7 +6,7 @@
 # The MIT License (MIT)
 #
 # Copyright (c)      2015 Martin Preisler <martin at preisler dot me>
-# Copyright (c) 2016-2018 Gilles Caulier <caulier dot gilles at gmail dot com>
+# Copyright (c) 2016-2019 Gilles Caulier <caulier dot gilles at gmail dot com>
 #
 # Blog post         : https://martin.preisler.me/2015/03/mingw-bundledlls-automatically-bundle-dlls/
 # Github repository : https://github.com/mpreisler/mingw-bundledlls
@@ -88,6 +88,7 @@ blacklist = [
     "d2d1.dll",
     "d3d11.dll",
     "dwrite.dll",
+    "dbghelp.dll",      # blacklisted dll from DrMinGW as it use MSVC dll to show debg dialog.
 ]
 
 # -----------------------------------------------
@@ -117,8 +118,7 @@ def find_full_path(filename, path_prefixes):
     if path is None:
         raise RuntimeError(
             "Can't find " + filename + ". If it is an inbuilt Windows DLL, "
-            "please add it to the blacklist variable in the script and send "
-            "a pull request!")
+            "please add it to the blacklist variable in this script.")
 
     return path
 
@@ -216,11 +216,14 @@ def main():
 
         for dep in all_deps:
             target = os.path.join(args.odir, os.path.basename(dep))
-            #print("Copying '%s' to '%s'" % (dep, target))
-            shutil.copy(dep, args.odir)
 
-            if args.upx:
-                subprocess.call(["upx", target])
+            # Only copy target file to bundle only if it do not exists yet.
+            if not os.path.exists(target):
+                print("Copying '%s' to '%s'" % (dep, target))
+                shutil.copy(dep, args.odir)
+
+                if args.upx:
+                    subprocess.call(["upx", target])
 
 # -----------------------------------------------
 

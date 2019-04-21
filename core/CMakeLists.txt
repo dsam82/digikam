@@ -16,7 +16,7 @@ message(STATUS "Starting CMake configuration for: ${PROJECT_NAME}")
 
 # digiKam version
 set(DIGIKAM_MAJOR_VERSION "6")
-set(DIGIKAM_MINOR_VERSION "1")
+set(DIGIKAM_MINOR_VERSION "2")
 set(DIGIKAM_PATCH_VERSION "0")
 
 # Suffix to add at end of version string. Usual values are:
@@ -104,6 +104,7 @@ option(ENABLE_MEDIAPLAYER                "Build digiKam with Media Player suppor
 option(ENABLE_DBUS                       "Build digiKam with DBUS support (default=ON)"                                       ON)
 option(ENABLE_APPSTYLES                  "Build digiKam with support for changing the widget application style (default=OFF)" OFF)
 option(ENABLE_QWEBENGINE                 "Build digiKam with QWebEngine instead of QWebKit (default=OFF)"                     OFF)
+option(ENABLE_FACESENGINE_DNN            "Build digiKam with Neural Network faces engine module (default=ON)"                 ON)
 
 # Mysql support options (experimental):
 option(ENABLE_MYSQLSUPPORT               "Build digiKam with MySQL dabatase support (default=ON)"                             ON)
@@ -319,6 +320,12 @@ find_package(Jasper)                               # For JPEG 2000 support.
 find_package(Eigen3)                               # For Refocus tool.
 find_package(OpenGL)                               # For Presentation tool.
 
+find_package(ImageMagick COMPONENTS Magick++)      # For QImage loader fail back to ImageMagick codecs.
+
+if(ImageMagick_Magick++_FOUND)
+    add_definitions(${ImageMagick_Magick++_DEFINITIONS})
+endif()
+
 # For Monitor Profiles management with LCMS
 find_package(X11)
 
@@ -509,28 +516,30 @@ message(STATUS "")
 
 # -- compilation options definitions -------------------------------------------
 
-MACRO_BOOL_TO_01(KF5Sane_FOUND           HAVE_KSANE)
-MACRO_BOOL_TO_01(KF5FileMetaData_FOUND   HAVE_KFILEMETADATA)
-MACRO_BOOL_TO_01(KF5AkonadiContact_FOUND HAVE_AKONADICONTACT)
-MACRO_BOOL_TO_01(KF5CalendarCore_FOUND   HAVE_KCALENDAR)
-MACRO_BOOL_TO_01(KF5Notifications_FOUND  HAVE_KNOTIFICATIONS)
-MACRO_BOOL_TO_01(KF5NotifyConfig_FOUND   HAVE_KNOTIFYCONFIG)
-MACRO_BOOL_TO_01(KF5KIO_FOUND            HAVE_KIO)
-MACRO_BOOL_TO_01(KF5IconThemes_FOUND     HAVE_KICONTHEMES)
-MACRO_BOOL_TO_01(KF5Vkontakte_FOUND      HAVE_VKONTAKTE)
-MACRO_BOOL_TO_01(LensFun_FOUND           HAVE_LENSFUN)
-MACRO_BOOL_TO_01(Lqr-1_FOUND             HAVE_LIBLQR_1)
-MACRO_BOOL_TO_01(Gphoto2_FOUND           HAVE_GPHOTO2)
-MACRO_BOOL_TO_01(Jasper_FOUND            HAVE_JASPER)
-MACRO_BOOL_TO_01(Eigen3_FOUND            HAVE_EIGEN3)
-MACRO_BOOL_TO_01(Marble_FOUND            HAVE_MARBLE)
-MACRO_BOOL_TO_01(ENABLE_MYSQLSUPPORT     HAVE_MYSQLSUPPORT)
-MACRO_BOOL_TO_01(ENABLE_INTERNALMYSQL    HAVE_INTERNALMYSQL)
-MACRO_BOOL_TO_01(ENABLE_MEDIAPLAYER      HAVE_MEDIAPLAYER)
-MACRO_BOOL_TO_01(ENABLE_DBUS             HAVE_DBUS)
-MACRO_BOOL_TO_01(ENABLE_APPSTYLES        HAVE_APPSTYLE_SUPPORT)
-MACRO_BOOL_TO_01(ENABLE_QWEBENGINE       HAVE_QWEBENGINE)
-MACRO_BOOL_TO_01(ENABLE_DRMINGW          HAVE_DRMINGW)
+MACRO_BOOL_TO_01(KF5Sane_FOUND              HAVE_KSANE)
+MACRO_BOOL_TO_01(KF5FileMetaData_FOUND      HAVE_KFILEMETADATA)
+MACRO_BOOL_TO_01(KF5AkonadiContact_FOUND    HAVE_AKONADICONTACT)
+MACRO_BOOL_TO_01(KF5CalendarCore_FOUND      HAVE_KCALENDAR)
+MACRO_BOOL_TO_01(KF5Notifications_FOUND     HAVE_KNOTIFICATIONS)
+MACRO_BOOL_TO_01(KF5NotifyConfig_FOUND      HAVE_KNOTIFYCONFIG)
+MACRO_BOOL_TO_01(KF5KIO_FOUND               HAVE_KIO)
+MACRO_BOOL_TO_01(KF5IconThemes_FOUND        HAVE_KICONTHEMES)
+MACRO_BOOL_TO_01(KF5Vkontakte_FOUND         HAVE_VKONTAKTE)
+MACRO_BOOL_TO_01(LensFun_FOUND              HAVE_LENSFUN)
+MACRO_BOOL_TO_01(Lqr-1_FOUND                HAVE_LIBLQR_1)
+MACRO_BOOL_TO_01(Gphoto2_FOUND              HAVE_GPHOTO2)
+MACRO_BOOL_TO_01(Jasper_FOUND               HAVE_JASPER)
+MACRO_BOOL_TO_01(Eigen3_FOUND               HAVE_EIGEN3)
+MACRO_BOOL_TO_01(Marble_FOUND               HAVE_MARBLE)
+MACRO_BOOL_TO_01(ENABLE_MYSQLSUPPORT        HAVE_MYSQLSUPPORT)
+MACRO_BOOL_TO_01(ENABLE_INTERNALMYSQL       HAVE_INTERNALMYSQL)
+MACRO_BOOL_TO_01(ENABLE_MEDIAPLAYER         HAVE_MEDIAPLAYER)
+MACRO_BOOL_TO_01(ENABLE_DBUS                HAVE_DBUS)
+MACRO_BOOL_TO_01(ENABLE_APPSTYLES           HAVE_APPSTYLE_SUPPORT)
+MACRO_BOOL_TO_01(ENABLE_QWEBENGINE          HAVE_QWEBENGINE)
+MACRO_BOOL_TO_01(ENABLE_FACESENGINE_DNN     HAVE_FACESENGINE_DNN)
+MACRO_BOOL_TO_01(ENABLE_DRMINGW             HAVE_DRMINGW)
+MACRO_BOOL_TO_01(ImageMagick_Magick++_FOUND HAVE_IMAGE_MAGICK)
 
 # Whether to use Qt's scaling to downscale previews. Under MacOSX, Qt
 # can make use of the higher physical resolution of Retina
@@ -552,11 +561,12 @@ message(STATUS "----------------------------------------------------------------
 message(STATUS " digiKam ${DIGIKAM_VERSION_STRING} dependencies results   <https://www.digikam.org>")
 message(STATUS "")
 
-PRINT_COMPONENT_COMPILE_STATUS("MySQL Database Support" ENABLE_MYSQLSUPPORT)
-PRINT_COMPONENT_COMPILE_STATUS("MySQL Internal Support" ENABLE_INTERNALMYSQL)
-PRINT_COMPONENT_COMPILE_STATUS("DBUS Support"           ENABLE_DBUS)
-PRINT_COMPONENT_COMPILE_STATUS("App. Style Support"     ENABLE_APPSTYLES)
-PRINT_COMPONENT_COMPILE_STATUS("QWebEngine Support"     ENABLE_QWEBENGINE)
+PRINT_COMPONENT_COMPILE_STATUS("MySQL Database Support"  ENABLE_MYSQLSUPPORT)
+PRINT_COMPONENT_COMPILE_STATUS("MySQL Internal Support"  ENABLE_INTERNALMYSQL)
+PRINT_COMPONENT_COMPILE_STATUS("DBUS Support"            ENABLE_DBUS)
+PRINT_COMPONENT_COMPILE_STATUS("App. Style Support"      ENABLE_APPSTYLES)
+PRINT_COMPONENT_COMPILE_STATUS("QWebEngine Support"      ENABLE_QWEBENGINE)
+PRINT_COMPONENT_COMPILE_STATUS("FacesEngine DNN Support" ENABLE_FACESENGINE_DNN)
 
 # ==============================================================================
 
@@ -578,6 +588,7 @@ PRINT_OPTIONAL_LIBRARY_STATUS("bison"             "https://www.gnu.org/software/
 PRINT_OPTIONAL_LIBRARY_STATUS("doxygen"           "http://www.doxygen.org"                                          "(version >= 1.8.0)"                    "digiKam will be compiled without API documentation building support."        Doxygen_FOUND)
 PRINT_OPTIONAL_LIBRARY_STATUS("flex"              "http://flex.sourceforge.net/"                                    "(version >= 2.5.0)"                    "digiKam will be compiled without Panorama support."                          FLEX_FOUND)
 PRINT_OPTIONAL_LIBRARY_STATUS("libakonadicontact" "https://cgit.kde.org/akonadi-contacts.git/about/"                "(version >= ${AKONADI_MIN_VERSION})"   "digiKam will be compiled without KDE desktop address book support."          KF5AkonadiContact_FOUND)
+PRINT_OPTIONAL_LIBRARY_STATUS("libmagick++"       "https://www.imagemagick.org"                                     "(version >= 6.7.0)"                    "digiKam will be compiled without ImageMagick codecs."                        HAVE_IMAGE_MAGICK)
 PRINT_OPTIONAL_LIBRARY_STATUS("libeigen3"         "http://eigen.tuxfamily.org"                                      "(version >= 3.0.0)"                    "digiKam will be compiled without Refocus tool support."                      Eigen3_FOUND)
 PRINT_OPTIONAL_LIBRARY_STATUS("libgphoto2"        "http://www.gphoto.org"                                           "(version >= 2.4.0)"                    "digiKam will be compiled without GPhoto2 camera drivers support."            Gphoto2_FOUND)
 PRINT_OPTIONAL_LIBRARY_STATUS("libjasper"         "http://www.ece.uvic.ca/~mdadams/jasper"                          "(version >= 1.7.0)"                    "digiKam will be compiled without JPEG2000 support."                          Jasper_FOUND)
@@ -734,7 +745,11 @@ if(DIGIKAM_CAN_BE_COMPILED)
     if(LensFun_FOUND)
         include_directories(${LENSFUN_INCLUDE_DIRS})
     endif()
-    
+
+    if(ImageMagick_FOUND)
+        include_directories(${ImageMagick_INCLUDE_DIRS})
+    endif()
+
     # ==========================================================================
     # Common targets parts
 

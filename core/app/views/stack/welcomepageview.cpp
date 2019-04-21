@@ -34,6 +34,9 @@
 #include <QWidget>
 #include <QApplication>
 #include <QStandardPaths>
+#ifdef HAVE_QWEBENGINE
+#   include <QtWebEngineWidgetsVersion>
+#endif
 
 // KDE includes
 
@@ -90,6 +93,11 @@ WelcomePageView::WelcomePageView(QWidget* const parent)
     setContentsMargins(QMargins());
 
 #ifdef HAVE_QWEBENGINE
+#if QTWEBENGINEWIDGETS_VERSION >= QT_VERSION_CHECK(5, 7, 0)
+    settings()->setAttribute(QWebEngineSettings::WebGLEnabled, false);
+    settings()->setAttribute(QWebEngineSettings::Accelerated2dCanvasEnabled, false);
+#endif
+
     WelcomePageViewPage* const wpage = new WelcomePageViewPage(this);
     setPage(wpage);
 #endif

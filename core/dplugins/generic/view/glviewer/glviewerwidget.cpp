@@ -220,7 +220,7 @@ GLViewerWidget::GLViewerWidget(DPlugin* const plugin, DInfoInterface* const ifac
 
 GLViewerWidget::~GLViewerWidget()
 {
-    for(int i = 0 ; i < CACHESIZE ; ++i)
+    for (int i = 0 ; i < CACHESIZE ; ++i)
     {
         d->cache[i].file_index = EMPTY;
         delete d->cache[i].texture;
@@ -249,7 +249,7 @@ void GLViewerWidget::initializeGL()
     glClearDepth(1.0f);
 
     // initialize cache
-    for(int i = 0 ; i < CACHESIZE ; ++i)
+    for (int i = 0 ; i < CACHESIZE ; ++i)
     {
         d->cache[i].file_index = EMPTY;
         d->cache[i].texture    = new GLViewerTexture(d->iface);
@@ -456,6 +456,8 @@ void GLViewerWidget::keyPressEvent(QKeyEvent* e)
 
         // zoom to original size
         case Qt::Key_O:
+            d->texture->loadFullSize();
+
             if (d->texture->setNewSize(QSize(0, 0)))
             {
                 downloadTexture(d->texture); //load full resolution image
@@ -860,13 +862,13 @@ void GLViewerWidget::slotTimeoutMouseMove()
  */
 OGLstate GLViewerWidget::getOGLstate() const
 {
-    //no OpenGL context is found. Are the drivers ok?
+    // No OpenGL context is found. Are the drivers ok?
     if (!isValid())
     {
         return oglNoContext;
     }
 
-    //GL_ARB_texture_rectangle is not supported
+    // GL_ARB_texture_rectangle is not supported
     QString s = QString::fromLatin1(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
 
     if (!s.contains(QString::fromLatin1("GL_ARB_texture_rectangle"), Qt::CaseInsensitive))
@@ -874,7 +876,7 @@ OGLstate GLViewerWidget::getOGLstate() const
         return oglNoRectangularTexture;
     }
 
-    //everything is ok!
+    // Everything is ok!
     return oglOK;
 }
 

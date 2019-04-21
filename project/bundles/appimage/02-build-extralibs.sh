@@ -34,7 +34,8 @@ ChecksRunAsRoot
 StartScript
 ChecksCPUCores
 CentOS6Adjustments
-. /opt/rh/devtoolset-4/enable
+RegisterRemoteServers
+. /opt/rh/devtoolset-6/enable
 
 ORIG_WD="`pwd`"
 
@@ -47,7 +48,8 @@ rm -rf $BUILDING_DIR/* || true
 cmake3 $ORIG_WD/../3rdparty \
        -DCMAKE_INSTALL_PREFIX:PATH=/usr \
        -DINSTALL_ROOT=/usr \
-       -DEXTERNALS_DOWNLOAD_DIR=$DOWNLOAD_DIR
+       -DEXTERNALS_DOWNLOAD_DIR=$DOWNLOAD_DIR \
+       -DENABLE_QTWEBENGINE=$DK_QTWEBENGINE
 
 # NOTE: The order to compile each component here is very important.
 

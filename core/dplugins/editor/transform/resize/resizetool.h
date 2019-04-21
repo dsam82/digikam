@@ -57,12 +57,17 @@ private:
     void renderingFinished();
     void blockWidgetSignals(bool b);
 
+    double pixelsToUnits(int pix);
+    int    unitsToPixels(double val);
+
 private Q_SLOTS:
 
     void slotSaveAsSettings();
     void slotLoadSettings();
     void slotResetSettings();
     void slotValuesChanged();
+    void slotUnitsChanged();
+    void slotPresetsChanged();
     void slotRestorationToggled(bool);
 
 private:

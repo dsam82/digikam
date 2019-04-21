@@ -26,6 +26,7 @@
 // Qt includes
 
 #include <QVariant>
+#include <QCollator>
 
 // KDE includes
 
@@ -138,6 +139,16 @@ QString DPluginAction::toString() const
 QString DPluginAction::pluginId() const
 {
     return property("DPluginId").toString();
+}
+
+bool DPluginAction::pluginActionLessThan(DPluginAction* const a, DPluginAction* const b)
+{
+    QCollator collator;
+    collator.setNumericMode(true);
+    collator.setIgnorePunctuation(true);
+    collator.setCaseSensitivity(Qt::CaseSensitive);
+
+    return (collator.compare(a->text(), b->text()) < 0);
 }
 
 } // namespace Digikam

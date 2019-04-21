@@ -4,10 +4,10 @@
  * https://www.digikam.org
  *
  * Date        : 2005-06-14
- * Description : This is the normal smoothscale method,
- *               based on Imlib2's smoothscale. Added
- *               smoothScaleSection - Scaling only of a
- *               section of a image. Added 16 bits image support
+ * Description : digiKam 8/16 bits image management API.
+ * Description : Smoothscale method based on Imlib2's implementations.
+ *               Add smoothScaleSection to scale only an image section.
+ *               Add 16 bits color depth image support.
  *
  * Copyright (C) 2005      by Renchi Raju <renchi dot raju at gmail dot com>
  * Copyright (C) 2006-2019 by Gilles Caulier <caulier dot gilles at gmail dot com>
@@ -177,7 +177,7 @@ DImg DImg::smoothScale(const QSize& destSize, Qt::AspectRatioMode aspectRatioMod
         return DImg();
     }
 
-    return smoothScaleClipped(scaleSize, QRect(QPoint(0,0), scaleSize));
+    return smoothScaleClipped(scaleSize, QRect(QPoint(0, 0), scaleSize));
 }
 
 DImg DImg::smoothScale(int dw, int dh, Qt::AspectRatioMode aspectRatioMode) const

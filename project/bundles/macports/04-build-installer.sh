@@ -40,6 +40,7 @@ ChecksRunAsRoot
 ChecksXCodeCLI
 ChecksCPUCores
 OsxCodeName
+#RegisterRemoteServers
 
 #################################################################################################
 
@@ -535,7 +536,7 @@ if [[ $DK_UPLOAD = 1 ]] ; then
 
     echo -e "---------- Upload new bundle Package files to files.kde.org repository \n"
 
-    scp $BUILDDIR/bundle/$TARGET_INSTALLER     $DK_UPLOADURL:$DK_UPLOADDIR
+    rsync -r -v --progress -e ssh $BUILDDIR/bundle/$TARGET_INSTALLER     $DK_UPLOADURL:$DK_UPLOADDIR
     scp $BUILDDIR/bundle/$TARGET_INSTALLER.sum $DK_UPLOADURL:$DK_UPLOADDIR
 
     if [[ $DK_SIGN = 1 ]] ; then

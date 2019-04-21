@@ -34,6 +34,7 @@ ChecksRunAsRoot
 StartScript
 ChecksCPUCores
 CentOS6Adjustments
+RegisterRemoteServers
 ORIG_WD="`pwd`"
 
 #################################################################################################
@@ -71,13 +72,28 @@ yum -y install wget \
                which \
                fuse \
                automake \
-               mesa-libEGL \
                cmake3 \
                gcc-c++ \
                patch \
+               libdrm-devel \
                libxcb \
+               libxcb-devel \
                xcb-util \
+               xcb-util-keysyms-devel \
+               xcb-util-devel \
                xkeyboard-config \
+               libXi-devel \
+               libXtst-devel \
+               libXrandr-devel \
+               libXi-devel \
+               libXcursor-devel \
+               libXcomposite-devel \
+               libXrender-devel \
+               mesa-libGL-devel \
+               mesa-libGLU-devel \
+               mesa-libEGL-devel \
+               mesa-libEGL \
+               xscreensaver \
                gperf \
                ruby \
                bison \
@@ -90,27 +106,17 @@ yum -y install wget \
                glibc-headers \
                mysql-devel \
                eigen3-devel \
+               openssl-devel \
                cppunit-devel \
                libstdc++-devel \
-               freetype-devel \
-               fontconfig-devel \
                libxml2-devel \
                libstdc++-devel \
-               libXrender-devel \
                lcms2-devel \
-               xcb-util-keysyms-devel \
-               libXi-devel \
-               mesa-libGL-devel \
-               mesa-libGLU-devel \
-               libxcb-devel \
-               xcb-util-devel \
                glibc-devel \
                libudev-devel \
-               libicu-devel \
                sqlite-devel \
                libusb-devel \
                libexif-devel \
-               libical-devel \
                libxslt-devel \
                xz-devel \
                lz4-devel \
@@ -118,34 +124,77 @@ yum -y install wget \
                openssl-devel \
                cups-devel \
                openal-soft-devel \
-               libical-devel
+               libical-devel \
+               libcap-devel \
+               fontconfig-devel \
+               freetype-devel \
+               patchelf \
+               dpkg
 
 #################################################################################################
 
-if [[ ! -f /opt/rh/devtoolset-4/enable ]] ; then
+if [[ "$(arch)" = "x86_64" ]] ; then
 
-    echo -e "---------- Install New Compiler Tools Set\n"
+    yum -y --nogpgcheck install centos-release-scl
 
-    if [[ "$(arch)" = "x86_64" ]] ; then
+    if [[ ! -f /opt/rh/python27/enable ]] ; then
 
-        # Newer compiler than what comes with official CentOS 6 (only 64 bits)
-        # TODO: This official devetoolset version 6 and later do not compile qtwebkit.
-        #yum -y install centos-release-scl-rh
-        #yum -y install devtoolset-6-gcc devtoolset-6-gcc-c++
+        echo -e "---------- Install New Python Interpreter\n"
+        yum -y --nogpgcheck install python27
 
-        # Newer compiler for CentOS 6 64 bits
+    fi
+
+    if [[ ! -f /opt/rh/rh-ruby24/enable ]] ; then
+
+        echo -e "---------- Install New Ruby Interpreter\n"
+        yum -y --nogpgcheck install rh-ruby24
+
+    fi
+
+    if [[ ! -f /opt/rh/devtoolset-6/enable ]] ; then
+
+        echo -e "---------- Install New Compiler Tools Set\n"
+        yum -y --nogpgcheck install devtoolset-6
+
+    fi
+
+else
+
+    if [[ ! -f /usr/bin/python2.6 ]] ; then
+
+        echo -e "---------- Install New Python Interpreter\n"
+
         cd /etc/yum.repos.d
-        wget https://copr.fedorainfracloud.org/coprs/mlampe/devtoolset-4.1/repo/epel-6/mlampe-devtoolset-4.1-epel-6.repo
-        yum -y --nogpgcheck install devtoolset-4-gcc devtoolset-4-gcc-c++
-        rm -f /etc/yum.repos.d/mlampe-devtoolset-4.1-epel-6.repo
+        wget https://copr.fedorainfracloud.org/coprs/ewdurbin/pythons-el6/repo/epel-6/ewdurbin-pythons-el6-epel-6.repo
+        yum -y --nogpgcheck install python27
+        rm -f /etc/yum.repos.d/ewdurbin-pythons-el6-epel-6.repo
 
-    else
+    fi
 
-        # Newer compiler for CentOS 6 32 bits
+    if [[ ! -f /etc/profile.d/rvm.sh ]] ; then
+
+        echo -e "---------- Install New Ruby Interpreter\n"
+
+        # Based this tutorial: https://tecadmin.net/install-ruby-latest-stable-centos/
+
+        curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
+        curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -
+        curl -L get.rvm.io | bash
+        source /etc/profile.d/rvm.sh
+        rvm reload
+        rvm requirements run
+        rvm install 2.4
+        rvm use 2.4 --default
+
+    fi
+
+    if [[ ! -f /opt/rh/devtoolset-6/enable ]] ; then
+
+        echo -e "---------- Install New Compiler Tools Set\n"
         cd /etc/yum.repos.d
-        wget https://copr.fedorainfracloud.org/coprs/mlampe/devtoolset-4.1/repo/epel-6/mlampe-devtoolset-4.1-epel-6.repo
-        yum -y --nogpgcheck install devtoolset-4-gcc devtoolset-4-gcc-c++
-        rm -f /etc/yum.repos.d/mlampe-devtoolset-4.1-epel-6.repo
+        wget https://copr.fedorainfracloud.org/coprs/mlampe/devtoolset-6/repo/epel-6/mlampe-devtoolset-6-epel-6.repo
+        yum -y --nogpgcheck install devtoolset-6-gcc devtoolset-6-gcc-c++
+        rm -f /etc/yum.repos.d/mlampe-devtoolset-6-epel-6.repo
 
     fi
 
@@ -176,6 +225,7 @@ fi
 yum -y install libass-devel \
                fdk-aac-devel \
                faac-devel \
+               libfribidi-devel \
                lame-devel \
                opencore-amr-devel \
                opus-devel \
@@ -187,6 +237,9 @@ yum -y install libass-devel \
                x264-devel \
                x265-devel \
                xvidcore-devel \
+               libwebp-devel \
+               OpenEXR-devel \
+               jbigkit-devel \
                yasm
 
 #################################################################################################
@@ -194,7 +247,19 @@ yum -y install libass-devel \
 echo -e "---------- Clean-up Old Packages\n"
 
 # Remove system based devel package to prevent conflict with new one.
-yum -y erase qt-devel boost-devel libgphoto2 sane-backends libjpeg-devel jasper-devel libpng-devel libtiff-devel ffmpeg ffmpeg-devel ant pulseaudio-libs-devel openssl-devel
+yum -y erase qt-devel \
+             boost-devel \
+             libgphoto2 \
+             sane-backends \
+             libjpeg-devel \
+             jasper-devel \
+             libpng-devel \
+             libtiff-devel \
+             ffmpeg \
+             ffmpeg-devel \
+             ant \
+             pulseaudio-libs-devel \
+             libicu-devel
 
 #################################################################################################
 
@@ -218,7 +283,19 @@ if [ ! -d $DOWNLOAD_DIR ] ; then
 fi
 
 # enable new compiler
-. /opt/rh/devtoolset-4/enable
+if [[ -f /opt/rh/devtoolset-6/enable ]] ; then
+    . /opt/rh/devtoolset-6/enable
+fi
+
+# enable new Python
+if [[ -f /opt/rh/python27/enable ]] ; then
+    . /opt/rh/python27/enable
+fi
+
+# enable new Ruby
+if [[ -f /opt/rh/rh-ruby24/enable ]] ; then
+    . /opt/rh/rh-ruby24/enable
+fi
 
 #################################################################################################
 
@@ -229,26 +306,34 @@ rm -rf $BUILDING_DIR/* || true
 cmake3 $ORIG_WD/../3rdparty \
        -DCMAKE_INSTALL_PREFIX:PATH=/usr \
        -DINSTALL_ROOT=/usr \
-       -DEXTERNALS_DOWNLOAD_DIR=$DOWNLOAD_DIR
+       -DEXTERNALS_DOWNLOAD_DIR=$DOWNLOAD_DIR \
+       -DENABLE_QTWEBENGINE=$DK_QTWEBENGINE
 
 # Low level libraries and Qt5 dependencies
 # NOTE: The order to compile each component here is very important.
 
-cmake3 --build . --config RelWithDebInfo --target ext_jpeg       -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_jasper     -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_png        -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_tiff       -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_libgphoto2 -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_sane       -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_boost      -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_openssl    -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_opencv     -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_lensfun    -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_qt         -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_qtwebkit   -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_exiv2      -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_ffmpeg     -- -j$CPU_CORES
-cmake3 --build . --config RelWithDebInfo --target ext_qtav       -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_jpeg          -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_jasper        -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_png           -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_tiff          -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_libicu        -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_qt            -- -j$CPU_CORES    # depend of tiff, png, jpeg
+
+if [[ $DK_QTWEBENGINE = 0 ]] ; then
+    cmake3 --build . --config RelWithDebInfo --target ext_qtwebkit  -- -j$CPU_CORES    # depend of Qt and libicu
+fi
+
+cmake3 --build . --config RelWithDebInfo --target ext_boost         -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_ffmpeg        -- -j$CPU_CORES    # depend of libass
+cmake3 --build . --config RelWithDebInfo --target ext_qtav          -- -j$CPU_CORES    # depend of qt and ffmpeg
+
+cmake3 --build . --config RelWithDebInfo --target ext_libgphoto2    -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_sane          -- -j$CPU_CORES    # depend of libgphoto2
+cmake3 --build . --config RelWithDebInfo --target ext_exiv2         -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_opencv        -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_lensfun       -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_liblqr        -- -j$CPU_CORES
+cmake3 --build . --config RelWithDebInfo --target ext_imagemagick   -- -j$CPU_CORES
 
 #################################################################################################
 

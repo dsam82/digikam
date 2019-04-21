@@ -109,25 +109,26 @@ QList<DPluginAction*> DPluginLoader::pluginsActions(DPluginAction::ActionType ty
         }
     }
 
-    if (!list.isEmpty())
-        return list;
-
-    foreach (DPlugin* const p, allPlugins())
+    if (list.isEmpty())
     {
-        DPluginEditor* const edit = dynamic_cast<DPluginEditor*>(p);
-
-        if (edit)
+        foreach (DPlugin* const p, allPlugins())
         {
-            foreach (DPluginAction* const ac, edit->actions(parent))
+            DPluginEditor* const edit = dynamic_cast<DPluginEditor*>(p);
+
+            if (edit)
             {
-                if (ac && (ac->actionType() == type))
+                foreach (DPluginAction* const ac, edit->actions(parent))
                 {
-                    list << ac;
+                    if (ac && (ac->actionType() == type))
+                    {
+                        list << ac;
+                    }
                 }
             }
         }
     }
 
+    std::sort(list.begin(), list.end(), DPluginAction::pluginActionLessThan);
     return list;
 }
 
@@ -149,28 +150,29 @@ QList<DPluginAction*> DPluginLoader::pluginsActions(DPluginAction::ActionCategor
                 }
             }
         }
-     }
+    }
 
-    if (!list.isEmpty())
-        return list;
-
-    foreach (DPlugin* const p, allPlugins())
+    if (list.isEmpty())
     {
-        DPluginEditor* const edit = dynamic_cast<DPluginEditor*>(p);
-
-        if (edit)
+        foreach (DPlugin* const p, allPlugins())
         {
-            foreach (DPluginAction* const ac, edit->actions(parent))
+            DPluginEditor* const edit = dynamic_cast<DPluginEditor*>(p);
+
+            if (edit)
             {
-                if (ac && (ac->actionCategory() == cat))
+                foreach (DPluginAction* const ac, edit->actions(parent))
                 {
-                    list << ac;
+                    if (ac && (ac->actionCategory() == cat))
+                    {
+                        list << ac;
+                    }
                 }
             }
         }
-     }
+    }
 
-     return list;
+    std::sort(list.begin(), list.end(), DPluginAction::pluginActionLessThan);
+    return list;
 }
 
 QList<DPluginAction*> DPluginLoader::pluginActions(const QString& pluginIID, QObject* const parent) const
@@ -195,27 +197,28 @@ QList<DPluginAction*> DPluginLoader::pluginActions(const QString& pluginIID, QOb
         }
     }
 
-    if (!list.isEmpty())
-        return list;
-
-    foreach (DPlugin* const p, allPlugins())
+    if (list.isEmpty())
     {
-        DPluginEditor* const edit = dynamic_cast<DPluginEditor*>(p);
-
-        if (edit)
+        foreach (DPlugin* const p, allPlugins())
         {
-            if (p->iid() == pluginIID)
-            {
-                foreach (DPluginAction* const ac, edit->actions(parent))
-                {
-                    list << ac;
-                }
+            DPluginEditor* const edit = dynamic_cast<DPluginEditor*>(p);
 
-                break;
+            if (edit)
+            {
+                if (p->iid() == pluginIID)
+                {
+                    foreach (DPluginAction* const ac, edit->actions(parent))
+                    {
+                        list << ac;
+                    }
+
+                    break;
+                }
             }
         }
     }
 
+    std::sort(list.begin(), list.end(), DPluginAction::pluginActionLessThan);
     return list;
 }
 

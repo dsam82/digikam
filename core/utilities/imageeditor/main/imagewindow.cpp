@@ -684,15 +684,14 @@ void ImageWindow::prepareImageToSave()
 
         if (!faceTags.isEmpty())
         {
-            QSize tempS = d->currentItemInfo.dimensions();
+            QSize size = d->currentItemInfo.dimensions();
             QMap<QString, QVariant>::const_iterator it;
 
             for (it = faceTags.constBegin() ; it != faceTags.constEnd() ; ++it)
             {
                 // Start transform each face rect
                 QRect faceRect = it.value().toRect();
-                int   tempH    = tempS.height();
-                int   tempW    = tempS.width();
+                QSize tempSize = size;
 
                 qCDebug(DIGIKAM_GENERAL_LOG) << ">>>>>>>>>face rect before:"
                                              << faceRect.x()     << faceRect.y()
@@ -705,18 +704,16 @@ void ImageWindow::prepareImageToSave()
                     switch (type)
                     {
                         case EditorWindow::TransformType::RotateLeft:
-                            faceRect = TagRegion::ajustToRotatedImg(faceRect, QSize(tempW, tempH), 1);
-                            std::swap(tempH, tempW);
+                            tempSize = TagRegion::adjustToOrientation(faceRect, MetaEngine::ORIENTATION_ROT_270, tempSize);
                             break;
                         case EditorWindow::TransformType::RotateRight:
-                            faceRect = TagRegion::ajustToRotatedImg(faceRect, QSize(tempW, tempH), 0);
-                            std::swap(tempH, tempW);
+                            tempSize = TagRegion::adjustToOrientation(faceRect, MetaEngine::ORIENTATION_ROT_90,  tempSize);
                             break;
                         case EditorWindow::TransformType::FlipHorizontal:
-                            faceRect = TagRegion::ajustToFlippedImg(faceRect, QSize(tempW, tempH), 0);
+                            tempSize = TagRegion::adjustToOrientation(faceRect, MetaEngine::ORIENTATION_HFLIP,   tempSize);
                             break;
                         case EditorWindow::TransformType::FlipVertical:
-                            faceRect = TagRegion::ajustToFlippedImg(faceRect, QSize(tempW, tempH), 1);
+                            tempSize = TagRegion::adjustToOrientation(faceRect, MetaEngine::ORIENTATION_VFLIP,   tempSize);
                             break;
                         default:
                             break;

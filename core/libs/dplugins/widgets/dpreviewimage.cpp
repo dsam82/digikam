@@ -811,7 +811,7 @@ void DPreviewImage::mousePressEvent(QMouseEvent* e)
                 // Beginning of a selection area change
                 d->mouseDragAction = Private::DRAWSELECTION;
                 d->selection->setVisible(true);
-                d->selection->setRect(QRectF(scenePoint, QSizeF(0,0)));
+                d->selection->setRect(QRectF(scenePoint, QSizeF(0, 0)));
                 d->mouseZone = DSelectionItem::BottomRight;
             }
             else if (d->selection->isVisible() &&
@@ -885,7 +885,7 @@ void DPreviewImage::mouseMoveEvent(QMouseEvent* e)
                  d->mouseDragAction == Private::EXPANDORSHRINK ||
                  d->mouseDragAction == Private::MOVESELECTION)
         {
-            ensureVisible(QRectF(scenePoint, QSizeF(0,0)), 1, 1);
+            ensureVisible(QRectF(scenePoint, QSizeF(0, 0)), 1, 1);
             QRectF rect = d->selection->rect();
 
             switch (d->mouseZone)
@@ -1142,29 +1142,29 @@ void DPreviewImage::leaveEvent(QEvent*)
 
 bool DPreviewImage::eventFilter(QObject* obj, QEvent* ev)
 {
-    if ( obj == d->toolBar )
+    if (obj == d->toolBar)
     {
-        if ( ev->type() == QEvent::Enter)
+        if (ev->type() == QEvent::Enter)
             setCursor(Qt::ArrowCursor);
-        else if ( ev->type() == QEvent::Leave)
+        else if (ev->type() == QEvent::Leave)
             unsetCursor();
 
         return false;
     }
-    else if ( obj == verticalScrollBar() && verticalScrollBar()->isVisible())
+    else if (obj == verticalScrollBar() && verticalScrollBar()->isVisible())
     {
-        if ( ev->type() == QEvent::Enter)
+        if (ev->type() == QEvent::Enter)
             setCursor(Qt::ArrowCursor);
-        else if ( ev->type() == QEvent::Leave)
+        else if (ev->type() == QEvent::Leave)
             unsetCursor();
 
         return false;
     }
-    else if ( obj == horizontalScrollBar() && horizontalScrollBar()->isVisible())
+    else if (obj == horizontalScrollBar() && horizontalScrollBar()->isVisible())
     {
-        if ( ev->type() == QEvent::Enter)
+        if (ev->type() == QEvent::Enter)
             setCursor(Qt::ArrowCursor);
-        else if ( ev->type() == QEvent::Leave)
+        else if (ev->type() == QEvent::Leave)
             unsetCursor();
 
         return false;

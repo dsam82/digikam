@@ -412,7 +412,7 @@ void EditorWindow::setupStandardActions()
     d->openWithAction->setWhatsThis(i18n("Open the item with default assigned application."));
     connect(d->openWithAction, SIGNAL(triggered()), this, SLOT(slotFileWithDefaultApplication()));
     ac->addAction(QLatin1String("open_with_default_application"), d->openWithAction);
-    ac->setDefaultShortcut(d->openWithAction, Qt::META + Qt::Key_F4);
+    ac->setDefaultShortcut(d->openWithAction, Qt::CTRL + Qt::Key_F4);
     d->openWithAction->setEnabled(false);
 
     m_fileDeleteAction = new QAction(QIcon::fromTheme(QLatin1String("user-trash-full")), i18nc("Non-pluralized", "Move to Trash"), this);
@@ -593,14 +593,14 @@ void EditorWindow::setupStandardActions()
     connect(d->rotateLeftAction, SIGNAL(triggered()), m_canvas, SLOT(slotRotate270()));
     connect(d->rotateLeftAction, SIGNAL(triggered()), this, SLOT(slotRotateLeftIntoQue()));
     ac->addAction(QLatin1String("editorwindow_transform_rotateleft"), d->rotateLeftAction);
-    ac->setDefaultShortcut(d->rotateLeftAction, Qt::SHIFT + Qt::CTRL + Qt::Key_Left);
+    ac->setDefaultShortcut(d->rotateLeftAction, Qt::CTRL + Qt::SHIFT + Qt::Key_Left);
     d->rotateLeftAction->setEnabled(false);
 
     d->rotateRightAction = new QAction(QIcon::fromTheme(QLatin1String("object-rotate-right")), i18n("Rotate Right"), this);
     connect(d->rotateRightAction, SIGNAL(triggered()), m_canvas, SLOT(slotRotate90()));
     connect(d->rotateRightAction, SIGNAL(triggered()), this, SLOT(slotRotateRightIntoQue()));
     ac->addAction(QLatin1String("editorwindow_transform_rotateright"), d->rotateRightAction);
-    ac->setDefaultShortcut(d->rotateRightAction, Qt::SHIFT + Qt::CTRL + Qt::Key_Right);
+    ac->setDefaultShortcut(d->rotateRightAction, Qt::CTRL + Qt::SHIFT + Qt::Key_Right);
     d->rotateRightAction->setEnabled(false);
 
     m_showBarAction = thumbBar()->getToggleAction(this);
@@ -2789,7 +2789,17 @@ void EditorWindow::registerExtraPluginsActions(QString& dom)
     dom.replace(QLatin1String("<!-- _DPLUGINS_EDITOR_FILES_ACTIONS_ -->"),     dpl->pluginXmlSections(DPluginAction::EditorFile,      this));
     dom.replace(QLatin1String("<!-- _DPLUGINS_EDITOR_COLORS_ACTIONS_ -->"),    dpl->pluginXmlSections(DPluginAction::EditorColors,    this));
     dom.replace(QLatin1String("<!-- _DPLUGINS_EDITOR_ENHANCE_ACTIONS_ -->"),   dpl->pluginXmlSections(DPluginAction::EditorEnhance,   this));
-    dom.replace(QLatin1String("<!-- _DPLUGINS_EDITOR_TRANSFORM_ACTIONS_ -->"), dpl->pluginXmlSections(DPluginAction::EditorTransform, this));
+
+    QString transformActions;
+    transformActions.append(QLatin1String("<Action name=\"editorwindow_transform_rotateleft\" />\n"));
+    transformActions.append(QLatin1String("<Action name=\"editorwindow_transform_rotateright\" />\n"));
+    transformActions.append(QLatin1String("<Action name=\"editorwindow_transform_fliphoriz\" />\n"));
+    transformActions.append(QLatin1String("<Action name=\"editorwindow_transform_flipvert\" />\n"));
+    transformActions.append(QLatin1String("<Action name=\"editorwindow_transform_crop\" />\n"));
+    transformActions.append(QLatin1String("<Separator/>\n"));
+    transformActions.append(dpl->pluginXmlSections(DPluginAction::EditorTransform, this));
+
+    dom.replace(QLatin1String("<!-- _DPLUGINS_EDITOR_TRANSFORM_ACTIONS_ -->"), transformActions);
     dom.replace(QLatin1String("<!-- _DPLUGINS_EDITOR_DECORATE_ACTIONS_ -->"),  dpl->pluginXmlSections(DPluginAction::EditorDecorate,  this));
     dom.replace(QLatin1String("<!-- _DPLUGINS_EDITOR_FILTERS_ACTIONS_ -->"),   dpl->pluginXmlSections(DPluginAction::EditorFilters,   this));
 }

@@ -33,6 +33,7 @@ echo "--------------------------------------------------------"
 . ./common.sh
 StartScript
 ChecksCPUCores
+RegisterRemoteServers
 
 #################################################################################################
 # Check if NSIS CLI tools is installed
@@ -137,9 +138,6 @@ echo -e "\n---------- OpenAL for QtAV"
 cp -r $MXE_INSTALL_PREFIX/bin/OpenAL32.dll                              $BUNDLEDIR/             2>/dev/null
 
 echo -e "\n---------- DrMinGw run-time"
-cp -r $MXE_INSTALL_PREFIX/bin/dbghelp.dll                               $BUNDLEDIR/             2>/dev/null
-cp -r $MXE_INSTALL_PREFIX/bin/symsrv.dll                                $BUNDLEDIR/             2>/dev/null
-cp -r $MXE_INSTALL_PREFIX/bin/symsrv.yes                                $BUNDLEDIR/             2>/dev/null
 cp -r $MXE_INSTALL_PREFIX/bin/exchndl.dll                               $BUNDLEDIR/             2>/dev/null
 cp -r $MXE_INSTALL_PREFIX/bin/mgwhelp.dll                               $BUNDLEDIR/             2>/dev/null
 
@@ -162,9 +160,12 @@ for app in $EXE_FILES ; do
 done
 
 DLL_FILES="\
-`find  $MXE_INSTALL_PREFIX/lib/plugins -name "*.dll" -type f | sed 's|$MXE_INSTALL_PREFIX/qt5/||'`     \
-`find  $MXE_INSTALL_PREFIX/qt5/plugins -name "*.dll" -type f | sed 's|$MXE_INSTALL_PREFIX/qt5/||'`     \
-`find  $MXE_INSTALL_PREFIX/plugins     -name "*.dll" -type f | sed 's|$MXE_INSTALL_PREFIX/plugins/||'` \
+`find  $MXE_INSTALL_PREFIX/lib/plugins -name "*.dll" -type f | sed 's|$MXE_INSTALL_PREFIX/libs/plugins||'` \
+`find  $MXE_INSTALL_PREFIX/qt5/plugins -name "*.dll" -type f | sed 's|$MXE_INSTALL_PREFIX/qt5/plugins||'`  \
+`find  $MXE_INSTALL_PREFIX/plugins     -name "*.dll" -type f | sed 's|$MXE_INSTALL_PREFIX/plugins/||'`     \
+$MXE_INSTALL_PREFIX/bin/OpenAL32.dll \
+$MXE_INSTALL_PREFIX/bin/exchndl.dll  \
+$MXE_INSTALL_PREFIX/bin/mgwhelp.dll  \
 "
 
 for app in $DLL_FILES ; do
@@ -172,6 +173,10 @@ for app in $DLL_FILES ; do
     $ORIG_WD/rll.py --copy --installprefix $MXE_INSTALL_PREFIX --odir $BUNDLEDIR --efile $app
 
 done
+
+# Remove this dll as it require the Microsoft debug SDK. Even if this dll is redistributable we won't be be relevant of this stuff.
+# This will not breal DrMinGw as backtraces will generated in a text file from home directory instead into a crash-course dialog.
+rm -f $BUNDLEDIR/dbghelp.dll
 
 #################################################################################################
 # Cleanup symbols in binary files to free space.
@@ -260,7 +265,7 @@ if [[ $DK_UPLOAD = 1 ]] ; then
 
     echo -e "---------- Upload new Windows bundle files to files.kde.org repository \n"
 
-    scp $ORIG_WD/bundle/$TARGET_INSTALLER     $DK_UPLOADURL:$DK_UPLOADDIR
+    rsync -r -v --progress -e ssh $ORIG_WD/bundle/$TARGET_INSTALLER     $DK_UPLOADURL:$DK_UPLOADDIR
     scp $ORIG_WD/bundle/$TARGET_INSTALLER.sum $DK_UPLOADURL:$DK_UPLOADDIR
 
     if [[ $DK_SIGN = 1 ]] ; then

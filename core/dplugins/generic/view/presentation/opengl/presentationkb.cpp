@@ -215,8 +215,7 @@ PresentationKB::PresentationKB(PresentationContainer* const sharedData)
       d(new Private)
 {
     setAttribute(Qt::WA_DeleteOnClose);
-
-    setWindowFlags(Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnTopHint | Qt::Popup);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Popup);
 
     QRect deskRect = QApplication::desktop()->screenGeometry(QApplication::activeWindow());
     d->deskX       = deskRect.x();
@@ -268,17 +267,6 @@ PresentationKB::PresentationKB(PresentationContainer* const sharedData)
     connect(d->timer, SIGNAL(timeout()),
             this, SLOT(moveSlot()));
 
-    // -- hide cursor when not moved --------------------
-
-    d->mouseMoveTimer = new QTimer(this);
-
-    connect(d->mouseMoveTimer, SIGNAL(timeout()),
-            this, SLOT(slotMouseMoveTimeOut()));
-
-    setMouseTracking(true);
-
-    slotMouseMoveTimeOut();
-
     // -- playback widget -------------------------------
 
 #ifdef HAVE_MEDIAPLAYER
@@ -289,14 +277,39 @@ PresentationKB::PresentationKB(PresentationContainer* const sharedData)
 
 #endif
 
+    // -- hide cursor when not moved --------------------
+
+    d->mouseMoveTimer = new QTimer(this);
+    d->mouseMoveTimer->setSingleShot(true);
+
+    connect(d->mouseMoveTimer, SIGNAL(timeout()),
+            this, SLOT(slotMouseMoveTimeOut()));
+
+    setMouseTracking(true);
+    slotMouseMoveTimeOut();
+
     // -- load image and let's start
 
     d->imageLoadThread->start();
     d->timer->start(1000 / frameRate);
+
+#ifdef HAVE_MEDIAPLAYER
+
+    if (d->sharedData->soundtrackPlay)
+        d->playbackWidget->slotPlay();
+
+#endif
 }
 
 PresentationKB::~PresentationKB()
 {
+#ifdef HAVE_MEDIAPLAYER
+    d->playbackWidget->slotStop();
+#endif
+
+    d->timer->stop();
+    d->mouseMoveTimer->stop();
+
     delete d->effect;
     delete d->image[0];
     delete d->image[1];
@@ -643,7 +656,6 @@ void PresentationKB::mouseMoveEvent(QMouseEvent* e)
 {
     setCursor(QCursor(Qt::ArrowCursor));
     d->mouseMoveTimer->start(1000);
-    d->mouseMoveTimer->setSingleShot(true);
 
 #ifdef HAVE_MEDIAPLAYER
     if (!d->playbackWidget->canHide())
@@ -651,13 +663,18 @@ void PresentationKB::mouseMoveEvent(QMouseEvent* e)
 
     QPoint pos(e->pos());
 
-    if ((pos.y() > (d->deskY + 20)) && (pos.y() < (d->deskY + d->deskHeight - 20 - 1)))
+    if ((pos.y() > (d->deskY + 20)) &&
+        (pos.y() < (d->deskY + d->deskHeight - 20 - 1)))
     {
         if (d->playbackWidget->isHidden())
+        {
             return;
+        }
         else
+        {
             d->playbackWidget->hide();
-
+            setFocus();
+        }
         return;
     }
 
@@ -671,10 +688,35 @@ void PresentationKB::slotMouseMoveTimeOut()
 {
     QPoint pos(QCursor::pos());
 
-    if ((pos.y() < (d->deskY + 20)) || (pos.y() > (d->deskY + d->deskHeight - 20 - 1)))
+    if ((pos.y() < (d->deskY + 20)) ||
+        (pos.y() > (d->deskY + d->deskHeight - 20 - 1))
+#ifdef HAVE_MEDIAPLAYER
+        || d->playbackWidget->underMouse()
+#endif
+       )
         return;
 
     setCursor(QCursor(Qt::BlankCursor));
+}
+
+bool PresentationKB::checkOpenGL() const
+{
+    // No OpenGL context is found. Are the drivers ok?
+    if (!isValid())
+    {
+        return false;
+    }
+
+    // GL_EXT_texture3D is not supported
+    QString s = QString::fromLatin1(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+
+    if (!s.contains(QString::fromLatin1("GL_EXT_texture3D"), Qt::CaseInsensitive))
+    {
+        return false;
+    }
+
+    // Everything is ok!
+    return true;
 }
 
 void PresentationKB::slotClose()

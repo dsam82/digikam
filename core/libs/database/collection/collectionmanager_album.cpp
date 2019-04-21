@@ -31,7 +31,7 @@ QStringList CollectionManager::allAvailableAlbumRootPaths()
     CoreDbAccess access;
     QStringList list;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
         if (location->status() == CollectionLocation::LocationAvailable)
         {
@@ -82,7 +82,7 @@ QString CollectionManager::albumRootPath(const QString& givenPath)
 {
     CoreDbAccess access;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
         QString rootPath = location->albumRootPath();
         QString filePath = QDir::fromNativeSeparators(givenPath);
@@ -109,7 +109,7 @@ bool CollectionManager::isAlbumRoot(const QString& filePath)
 {
     CoreDbAccess access;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
         if (filePath == location->albumRootPath())
         {
@@ -129,35 +129,29 @@ QString CollectionManager::album(const QString& filePath)
 {
     CoreDbAccess access;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
-        QString absolutePath = location->albumRootPath();
+        QString rootPath = location->albumRootPath();
 
-        if (absolutePath.isEmpty())
+        if (rootPath.isEmpty() || !filePath.startsWith(rootPath))
         {
             continue;
         }
 
-        QString firstPart = filePath.left(absolutePath.length());
+        QString album = filePath.mid(rootPath.length());
 
-        if (firstPart == absolutePath)
+        if (album.isEmpty() || album == QLatin1String("/"))
         {
-            if (filePath == absolutePath ||
-                (filePath.length() == absolutePath.length() + 1 && filePath.right(1) == QLatin1String("/")))
+            return QLatin1String("/");
+        }
+        else if (album.startsWith(QLatin1Char('/')))
+        {
+            if (album.endsWith(QLatin1Char('/')))
             {
-                return QLatin1String("/");
+                album.chop(1);
             }
-            else
-            {
-                QString album = filePath.mid(absolutePath.length());
 
-                if (album.endsWith(QLatin1Char('/')))
-                {
-                    album.chop(1);
-                }
-
-                return album;
-            }
+            return album;
         }
     }
 
@@ -204,7 +198,7 @@ QString CollectionManager::oneAlbumRootPath()
 {
     CoreDbAccess access;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
         if (location->status() == CollectionLocation::LocationAvailable)
         {
@@ -241,7 +235,7 @@ void CollectionManager::slotAlbumRootChange(const AlbumRootChangeset& changeset)
                 {
                     QList<AlbumRootInfo> infos = access.db()->getAlbumRoots();
 
-                    foreach(const AlbumRootInfo& info, infos)
+                    foreach (const AlbumRootInfo& info, infos)
                     {
                         if (info.id == location->id())
                         {

@@ -1,50 +1,18 @@
-digiKam 6.1.0 - Release date: 2019-03-10
+digiKam 6.2.0 - Release date: 2019-06-??
 
 *****************************************************************************************************
 NEW FEATURES:
-
-General     : New plugins interface for digiKam and Showfoto named dplugins.
-General     : All export tools become generic plugins and are shared with Showfoto.
-General     : Update internal libpgf to last 07193.
-BQM         : Add new advanced settings in resize tool.
-BQM         : All Batch Queue Manager tools become Bqm plugins.
-Editor      : All Image Editor tools become Editor plugins and are shared with Showfoto.
-Item View   : Add sort items by modification date.
 
 
 *****************************************************************************************************
 BUGFIXES:
 
 001 ==> 279216 - "Resize image" feature is missing some useful options [patch].
-002 ==> 368779 - Missing translations to Plugin Categories columns in setup page.
-003 ==> 165852 - Google Youtube video uploader.
-004 ==> 404578 - Links broken on downloadpage for 6.0.0.
-005 ==> 402069 - FAQ link on Support page is broken.
-006 ==> 404503 - There is a typo in support section of website.
-007 ==> 404621 - I can not import the album Google Photo.
-008 ==> 404642 - digiKam flatpak: Please include mysql driver (for using an external mysql db).
-009 ==> 404690 - There is an unwanted bar in the left screen edge in full screen view.
-010 ==> 404736 - Merging tags keeps popping up confirmation dialogs every second.
-011 ==> 404737 - digiKam does not compile with opencv 3.4.1.
-012 ==> 404735 - F2 should edit tag name when tag name has focus.
-013 ==> 404748 - Default Album rename dialog should be larger (or save its size when changed).
-014 ==> 304811 - Offer a "stretch histogram" functionality to automatically adjust brightness & gamma.
-015 ==> 374464 - Can start print wizzard.
-016 ==> 316687 - ImageMagick-6.8.3.9 could not be found.
-017 ==> 305137 - wish for integrated(?) clip-generator.
-018 ==> 404821 - Presentation offset from full screen when OpenGL transitions selected.
-019 ==> 404894 - 6.0.0 x86-64 appimage startup complains about mssing ']' (startup bash script being called).
-020 ==> 368262 - Google services tool does not use kaccounts.
-021 ==> 376913 - Can't create a new album in picasa/googlephoto.
-022 ==> 404896 - Vertical video are displayed horizontally.
-023 ==> 404859 - Using Batch Queue Manager to make a JPG copy of the images on completion the "arw" images are no longer visible in the originating album.
-024 ==> 404893 - Digikam::DigikamApp::slotSolidDeviceChanged: slotSolidDeviceChanged: messages referring to directory that digikam should not care about.
-025 ==> 264296 - Lack of right-click delete of points in Curves [patch].
-026 ==> 404954 - Places, Devices, and Removable Devices no longer show in "Select Target Location".
-027 ==> 404962 - List of subfolders: incorrect encoding (spaces -> %20, accents).
-028 ==> 402724 - digiKam Settings/Configuration: missing section "Plugins" in Windows/6.0.0B3.
-029 ==> 404987 - Ability to select which import/export options are included in menu.
-030 ==> 404999 - Inconsistency in facetag font size.
-031 ==> 244259 - Last image is displayed twice when Advanced Slideshow with KenBurns effect is run more than once.
-032 ==> 405043 - Add volume control to video playback.
-033 ==> 
+002 ==> 406581 - "No such album" when dragging duplicated Tag to merge them.
+003 ==> 406585 - Feature request: clean or hide empty Tags.
+004 ==> 389657 - QFile::rename: Empty or null file name.
+005 ==> 406610 - Hit enter when renaming, sometime don't rename correctly.
+006 ==> 406637 - Duplicates "Search in" Doesn't Show Collection Name Upon First Selection.
+007 ==> 406226 - Adding tags to a selection from a large list of no-tags images takes a very long time.
+008 ==> 374302 - MYSQL : all Images with Geoinfo seem to be at (0°, 0°).
+009 ==> 

@@ -22,6 +22,15 @@
  *
  * ============================================================ */
 
+#include "digikam_config.h"
+
+// ImageMagick includes
+
+#ifdef HAVE_IMAGE_MAGICK
+#   include <Magick++.h>
+using namespace Magick;
+#endif
+
 // Qt includes
 
 #include <QFile>
@@ -42,7 +51,6 @@
 
 // Local includes
 
-#include "digikam_config.h"
 #include "digikam_debug.h"
 #include "digikam_version.h"
 #include "digikam_globals.h"
@@ -63,6 +71,12 @@
 #include "applicationsettings.h"
 #include "similaritydbaccess.h"
 
+#ifdef Q_OS_WIN
+#   include <windows.h>
+#   include <shellapi.h>
+#   include <objbase.h>
+#endif
+
 using namespace Digikam;
 
 int main(int argc, char* argv[])
@@ -70,6 +84,10 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 
     tryInitDrMingw();
+
+#ifdef HAVE_IMAGE_MAGICK
+    InitializeMagick(NULL);
+#endif
 
 #ifdef Q_OS_LINUX
     app.setAttribute(Qt::AA_UseHighDpiPixmaps, true);
@@ -246,6 +264,11 @@ int main(int argc, char* argv[])
         QIcon::setThemeName(iconTheme);
     }
 
+#ifdef Q_OS_WIN
+    // Necessary to open native open with dialog on windows
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+#endif
+
     // create main window
     DigikamApp* const digikam = new DigikamApp();
 
@@ -294,6 +317,17 @@ int main(int argc, char* argv[])
     FaceDbAccess::cleanUpDatabase();
     SimilarityDbAccess::cleanUpDatabase();
     MetaEngine::cleanupExiv2();
+
+#ifdef Q_OS_WIN
+    // Necessary to open native open with dialog on windows
+    CoUninitialize();
+#endif
+
+#ifdef HAVE_IMAGE_MAGICK
+#   if MagickLibVersion >= 0x693
+    TerminateMagick();
+#   endif
+#endif
 
     return ret;
 }

@@ -46,11 +46,6 @@
 namespace Digikam
 {
 
-static bool pluginNameLessThan(DPlugin* const a, DPlugin* const b)
-{
-    return a->name() < b->name();
-}
-
 DPluginLoader::Private::Private()
     : pluginsLoaded(false)
 {
@@ -120,7 +115,6 @@ bool DPluginLoader::Private::appendPlugin(QObject* const obj,
             qCDebug(DIGIKAM_GENERAL_LOG) << "Plugin of type" << obj->metaObject()->superClass()->className()
                                          << "loaded from"    << loader->fileName();
 
-
             KSharedConfigPtr config = KSharedConfig::openConfig();
             KConfigGroup group      = config->group(DPluginLoader::instance()->configGroupName());
 
@@ -129,9 +123,9 @@ bool DPluginLoader::Private::appendPlugin(QObject* const obj,
 
             allPlugins << plugin;
             allLoaders << loader;
-        }
 
-        return true;
+            return true;
+        }
     }
 
     return false;
@@ -164,7 +158,7 @@ void DPluginLoader::Private::loadPlugins()
             continue;
         }
 
-        // qCDebug(DIGIKAM_GENERAL_LOG) << fileName << " - " << pluginPath(fileName);
+        // qCDebug(DIGIKAM_GENERAL_LOG) << info.baseName() << "-" << info.canonicalPath();
         const QString path          = info.canonicalFilePath();
         QPluginLoader* const loader = new QPluginLoader(path, DPluginLoader::instance());
         QObject* const obj          = loader->instance();
@@ -198,10 +192,6 @@ void DPluginLoader::Private::loadPlugins()
     {
         qCWarning(DIGIKAM_GENERAL_LOG) << "No plugins loaded. Please check if the plugins were installed in the correct path,"
                                        << "or if any errors occurred while loading plugins.";
-    }
-    else
-    {
-        std::sort(allPlugins.begin(), allPlugins.end(), pluginNameLessThan);
     }
 
     pluginsLoaded = true;

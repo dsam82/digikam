@@ -11,12 +11,14 @@
 preload_shared_library ()
 {
     FILE=$1
-    echo "$FILE"
+    echo -e "$FILE "
 
     if [[ "$(arch)" = "x86_64" ]] ; then
         # 64 bits system
 
-        if [ -f "/usr/lib64/$FILE" ] ; then
+        if   [ -f "$DIR/usr/lib64/$FILE" ] ; then
+            export LD_PRELOAD=$LD_PRELOAD:$DIR/usr/lib64/$FILE
+        elif [ -f "/usr/lib64/$FILE" ] ; then
             export LD_PRELOAD=$LD_PRELOAD:/usr/lib64/$FILE
         elif [ -f "/usr/lib/x86_64-linux-gnu/$FILE" ] ; then
             export LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/$FILE
@@ -27,7 +29,9 @@ preload_shared_library ()
     else
         # 32 bits system
 
-        if [ -f "/usr/lib/$FILE" ] ; then
+        if   [ -f "$DIR/usr/lib/$FILE" ] ; then
+            export LD_PRELOAD=$LD_PRELOAD:$DIR/usr/lib/$FILE
+        elif [ -f "/usr/lib/$FILE" ] ; then
             export LD_PRELOAD=$LD_PRELOAD:/usr/lib/$FILE
         elif [ -f "/usr/lib/i386-linux-gnu/$FILE" ] ; then
             export LD_PRELOAD=$LD_PRELOAD:/usr/lib/i386-linux-gnu/$FILE
@@ -38,12 +42,10 @@ preload_shared_library ()
     fi
 }
 
-preload_shared_library libfreetype.so
-preload_shared_library libudev.so
 
-echo "-- digiKam AppImage Bundle"
-echo "-- Use 'help' as CLI argument to know all available options for digiKam application"
-echo "-- Preloading shared libs: $LD_PRELOAD"
+echo "-- digiKam Linux AppImage Bundle"
+echo "-- Use 'help' as CLI argument to know all available options for digiKam application."
+echo "-- Note: to integrate this bundle to your desktop, use AppImageLauncher."
 
 DIR="`dirname \"$0\"`"
 DIR="`( cd \"$DIR\" && pwd )`"
@@ -61,6 +63,10 @@ export PATH=$DIR/usr/bin:$DIR/usr/lib:$DIR/usr/lib/libexec/kf5:$DIR/usr/share/di
 export KDE_FORK_SLAVES=1
 export CAMLIBS=$DIR/usr/lib/libgphoto2
 export IOLIBS=$DIR/usr/lib/libgphoto2_port
+
+# QtWebEngine crash with some video card drivers
+# https://github.com/qutebrowser/qutebrowser/issues/2368
+export QT_XCB_FORCE_SOFTWARE_OPENGL=1
 
 # code to disable Plasma desktopk detection with QDesktopService
 export APPIMAGE_ORIGINAL_KDE_FULL_SESSION=$KDE_FULL_SESSION
@@ -82,6 +88,19 @@ export APPIMAGE_STARTUP_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export APPIMAGE_STARTUP_QT_PLUGIN_PATH=$QT_PLUGIN_PATH
 export APPIMAGE_STARTUP_XDG_DATA_DIRS=$XDG_DATA_DIRS
 export APPIMAGE_STARTUP_PATH=$PATH
+
+# See bug #401377: tested on Fedora 29 and Mageia 7 for transitional migration from openssl 1.0 to openssl 1.1
+if [ -f /etc/pki/openssl10.cnf ]; then
+    export OPENSSL_CONF=/etc/pki/openssl10.cnf
+fi
+
+preload_shared_library libudev.so.0
+#preload_shared_library libfontconfig.so.1
+#preload_shared_library libfreetype.so.6
+#preload_shared_library libssl.so.10
+#preload_shared_library libcrypto.so.10
+
+echo "-- Preloading shared libs: $LD_PRELOAD"
 
 # Parse CLI options.
 

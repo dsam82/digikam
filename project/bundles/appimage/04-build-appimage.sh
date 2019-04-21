@@ -49,13 +49,13 @@ ChecksRunAsRoot
 StartScript
 ChecksCPUCores
 CentOS6Adjustments
-. /opt/rh/devtoolset-4/enable
+RegisterRemoteServers
+. /opt/rh/devtoolset-6/enable
 
 #################################################################################################
 
 # Working directory
 ORIG_WD="`pwd`"
-APP_IMG_DIR="/digikam.appdir"
 
 DK_RELEASEID=`cat $ORIG_WD/data/RELEASEID.txt`
 
@@ -141,15 +141,17 @@ cp -r /usr/share/metainfo/org.kde.digikam.appdata.xml   ./usr/share/metainfo/dig
 cp -r /usr/share/metainfo/org.kde.showfoto.appdata.xml  ./usr/share/metainfo/showfoto.appdata.xml
 
 # QWebEngine bin data files.
-[[ -e /usr/ressources ]] && cp -r /usr/resources ./usr/
+if [[ $DK_QTWEBENGINE = 1 ]] ; then
+    cp -r /usr/resources ./usr
+fi
 
 # copy libgphoto2 drivers
 find  /usr/lib/libgphoto2      -name "*.so" -type f -exec cp {} ./usr/lib/libgphoto2 \;      2>/dev/null
 find  /usr/lib/libgphoto2_port -name "*.so" -type f -exec cp {} ./usr/lib/libgphoto2_port \; 2>/dev/null
 
 # copy sane backends
-
 cp -r /usr/lib/sane                       ./usr/lib
+rm ./usr/lib/sane/*.la
 cp -r /usr/etc/sane.d                     ./usr/etc
 
 # copy i18n
@@ -159,16 +161,16 @@ if [[ -e /usr/translations ]]; then
 
     cp -r /usr/translations ./usr
     # optimizations
-    rm ./usr/translations/assistant*
-    rm ./usr/translations/designer*
-    rm ./usr/translations/linguist*
-    rm ./usr/translations/qmlviewer*
-    rm ./usr/translations/qtmultimedia*
-    rm ./usr/translations/qtscript*
-    rm ./usr/translations/qtquick*
-    rm ./usr/translations/qt_help*
-    rm ./usr/translations/qtserialport*
-    rm ./usr/translations/qtwebsockets*
+    rm -rf ./usr/translations/assistant*    || true
+    rm -rf ./usr/translations/designer*     || true
+    rm -rf ./usr/translations/linguist*     || true
+    rm -rf ./usr/translations/qmlviewer*    || true
+    rm -rf ./usr/translations/qtmultimedia* || true
+    rm -rf ./usr/translations/qtscript*     || true
+    rm -rf ./usr/translations/qtquick*      || true
+    rm -rf ./usr/translations/qt_help*      || true
+    rm -rf ./usr/translations/qtserialport* || true
+    rm -rf ./usr/translations/qtwebsockets* || true
 
 fi
 
@@ -246,11 +248,11 @@ for FILE in $FILES ; do
     CopyReccursiveDependencies ${FILE} ./usr/lib
 done
 
-#FILES=$(ls /usr/$LIB_PATH_ALT/plugins/imageformats/*.so)
-#
-#for FILE in $FILES ; do
-#    CopyReccursiveDependencies /usr/plugins/imageformats/*.so ./usr/lib
-#done
+FILES=$(ls /usr/plugins/imageformats/*.so)
+
+for FILE in $FILES ; do
+    CopyReccursiveDependencies ${FILE} ./usr/lib
+done
 
 # Copy in the indirect dependencies
 FILES=$(find . -type f -executable)
@@ -263,72 +265,123 @@ done
 
 echo -e "---------- Clean-up Bundle Directory Contents\n"
 
+# The following are assumed to be part of the base system
+
+# This list is taken from linuxdeplotqt
+# [https://github.com/probonopd/linuxdeployqt/blob/master/tools/linuxdeployqt/excludelist.h]
+# NOTE: libglapi is included explicity in Krita exclude list.
+EXCLUDE_FILES="\
+ld-linux.so.2 \
+ld-linux-x86-64.so.2 \
+libanl.so.1 \
+libasound.so.2 \
+libBrokenLocale.so.1 \
+libcidn.so.1 \
+libcom_err.so.2 \
+libcrypt.so.1 \
+libc.so.6 \
+libdl.so.2 \
+libdrm.so.2 \
+libexpat.so.1 \
+libfontconfig.so.1 \
+libfreetype.so.6 \
+libgcc_s.so.1 \
+libgdk_pixbuf-2.0.so.0 \
+libgio-2.0.so.0 \
+libglapi.so.0 \
+libglib-2.0.so.0 \
+libGL.so.1 \
+libgobject-2.0.so.0 \
+libgpg-error.so.0 \
+libharfbuzz.so.0 \
+libICE.so.6 \
+libjack.so.0 \
+libm.so.6 \
+libmvec.so.1 \
+libnsl.so.1 \
+libnss_compat.so.2 \
+libnss_db.so.2 \
+libnss_dns.so.2 \
+libnss_files.so.2 \
+libnss_hesiod.so.2 \
+libnss_nisplus.so.2 \
+libnss_nis.so.2 \
+libp11-kit.so.0 \
+libpango-1.0.so.0 \
+libpangocairo-1.0.so.0 \
+libpangoft2-1.0.so.0 \
+libpthread.so.0 \
+libresolv.so.2 \
+librt.so.1 \
+libSM.so.6 \
+libstdc++.so.6 \
+libthai.so.0 \
+libthread_db.so.1 \
+libusb-1.0.so.0 \
+libutil.so.1 \
+libuuid.so.1 \
+libX11.so.6 \
+libxcb.so.1 \
+libz.so.1 \
+"
+
+for FILE in $EXCLUDE_FILES ; do
+    if [[ -f usr/lib/${FILE} ]] ; then
+        echo -e "   ==> ${FILE} will be removed for the bundle"
+        rm -f usr/lib/${FILE}
+    fi
+done
+
+# This list is taken from older AppImage build script from krita
+# NOTE: libopenal => see bug 390162.
+#       libdbus-1 => see Krita rules.
+EXTRA_EXCLUDE_FILES="\
+libgssapi_krb5.so.2 \
+libgssapi.so.3 \
+libhcrypto.so.4 \
+libheimbase.so.1 \
+libheimntlm.so.0 \
+libhx509.so.5 \
+libidn.so.11 \
+libk5crypto.so.3 \
+libkrb5.so.26 \
+libkrb5.so.3 \
+libkrb5support.so.0 \
+libpcre.so.3 \
+libroken.so.18 \
+libsasl2.so.2 \
+libwind.so.0 \
+libopenal.so.1 \
+libdbus-1.so.3 \
+"
+
+#liblber-2.4.so.2       # needed for debian wheezy
+#libldap_r-2.4.so.2     # needed for debian wheezy
+
+#libffi.so.6            # needed for Ubuntu 11.04
+#libxcb-glx.so.0        # needed for Ubuntu 11.04
+
+#libkeyutils.so.1       # Originally removed in linuxdeployqt, but needed for Gentoo (see https://bugs.kde.org/show_bug.cgi?id=406171#c2)
+
+for FILE in $EXCLUDE_FILES ; do
+    if [[ -f usr/lib/${FILE} ]] ; then
+        echo -e "   ==> ${FILE} will be removed for the bundle"
+        rm -f usr/lib/${FILE}
+    fi
+done
+
 ln -s libssl.so.10 usr/lib/libssl.so || true
 
-# The following are assumed to be part of the base system
-rm -f usr/lib/libcom_err.so.2 || true
-rm -f usr/lib/libcrypt.so.1 || true
-rm -f usr/lib/libdl.so.2 || true
-rm -f usr/lib/libexpat.so.1 || true
-rm -f usr/lib/libgcc_s.so.1 || true
-rm -f usr/lib/libglib-2.0.so.0 || true
-rm -f usr/lib/libgpg-error.so.0 || true
-rm -f usr/lib/libgssapi_krb5.so.2 || true
-rm -f usr/lib/libgssapi.so.3 || true
-rm -f usr/lib/libhcrypto.so.4 || true
-rm -f usr/lib/libheimbase.so.1 || true
-rm -f usr/lib/libheimntlm.so.0 || true
-rm -f usr/lib/libhx509.so.5 || true
-rm -f usr/lib/libICE.so.6 || true
-rm -f usr/lib/libidn.so.11 || true
-rm -f usr/lib/libk5crypto.so.3 || true
-rm -f usr/lib/libkeyutils.so.1 || true
-rm -f usr/lib/libkrb5.so.26 || true
-rm -f usr/lib/libkrb5.so.3 || true
-rm -f usr/lib/libkrb5support.so.0 || true
-# rm -f usr/lib/liblber-2.4.so.2 || true # needed for debian wheezy
-# rm -f usr/lib/libldap_r-2.4.so.2 || true # needed for debian wheezy
-rm -f usr/lib/libm.so.6 || true
-rm -f usr/lib/libp11-kit.so.0 || true
-rm -f usr/lib/libpcre.so.3 || true
-rm -f usr/lib/libpthread.so.0 || true
-rm -f usr/lib/libresolv.so.2 || true
-rm -f usr/lib/libroken.so.18 || true
-rm -f usr/lib/librt.so.1 || true
-rm -f usr/lib/libsasl2.so.2 || true
-rm -f usr/lib/libSM.so.6 || true
-rm -f usr/lib/libusb-1.0.so.0 || true
-rm -f usr/lib/libuuid.so.1 || true
-rm -f usr/lib/libwind.so.0 || true
-rm -f usr/lib/libfontconfig.so.* || true
-# Remove this library, else appimage cannot be started properly (Bug #390162)
-rm -f usr/lib/libopenal.so.1 || true
-
-# Remove these libraries, we need to use the system versions; this means 11.04 is not supported (12.04 is our baseline)
-rm -f usr/lib/libGL.so.* || true
-rm -f usr/lib/libdrm.so.* || true
-rm -f usr/lib/libX11.so.* || true
-rm -f usr/lib/libz.so.1 || true
-
-# These seem to be available on most systems but not Ubuntu 11.04
-# rm -f usr/lib/libffi.so.6 usr/lib/libGL.so.1 usr/lib/libglapi.so.0 usr/lib/libxcb.so.1 usr/lib/libxcb-glx.so.0 || true
-
-# Delete potentially dangerous libraries
-rm -f usr/lib/libstdc* usr/lib/libgobject* usr/lib/libc.so.* || true
-rm -f usr/lib/libxcb.so.1
-
-# Do NOT delete libX* because otherwise on Ubuntu 11.04:
-# loaded library "Xcursor" malloc.c:3096: sYSMALLOc: Assertion (...) Aborted
-
 # We don't bundle the developer stuff
-rm -rf usr/include || true
-rm -rf usr/lib/cmake3 || true
-rm -rf usr/lib/pkgconfig || true
-rm -rf usr/share/ECM/ || true
-rm -rf usr/share/gettext || true
+rm -rf usr/include         || true
+rm -rf usr/lib/cmake3      || true
+rm -rf usr/lib/pkgconfig   || true
+rm -rf usr/share/ECM/      || true
+rm -rf usr/share/gettext   || true
 rm -rf usr/share/pkgconfig || true
 
 #################################################################################################
+# See LFS instruction: http://www.linuxfromscratch.org/lfs/view/systemd/chapter05/stripping.html
 
 echo -e "---------- Strip Binaries Files \n"
 
@@ -339,8 +392,9 @@ else
 fi
 
 for FILE in $FILES ; do
-    echo -e "Strip symbols in: $FILE"
-    strip ${FILE} 2>/dev/null || true
+    echo -en "Strip symbols in: $FILE"
+    /usr/bin/strip --strip-debug ${FILE}
+    echo -e " ==> OK"
 done
 
 #################################################################################################
@@ -356,18 +410,10 @@ cd usr/ ; find . -type f -exec sed -i -e 's|$APP_IMG_DIR/usr/|./././././././././
 # Also, Krita has a hardcoded /usr which we patch away
 cd usr/ ; find . -type f -exec sed -i -e 's|/usr|././|g' {} \; ; cd ..
 
-# We do not bundle this, so let's not search that inside the AppImage. 
+# We do not bundle this, so let's not search that inside the AppImage.
 # Fixes "Qt: Failed to create XKB context!" and lets us enter text
 sed -i -e 's|././/share/X11/|/usr/share/X11/|g' ./usr/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so
 sed -i -e 's|././/share/X11/|/usr/share/X11/|g' ./usr/lib/libQt5XcbQpa.so.5
-
-# Workaround for:
-# D-Bus library appears to be incorrectly set up;
-# failed to read machine uuid: Failed to open
-# The file is more commonly in /etc/machine-id
-# sed -i -e 's|/var/lib/dbus/machine-id|//././././etc/machine-id|g' ./usr/lib/libdbus-1.so.3
-# or
-rm -f ./usr/lib/libdbus-1.so.3 || true
 
 #################################################################################################
 
@@ -379,10 +425,16 @@ APP=digikam
 #    DEBUG_SUF="-debug"
 #fi
 
+if [[ $DK_QTWEBENGINE = 1 ]] ; then
+    WEB_BROWSER="-qtwebengine"
+else
+    WEB_BROWSER="-qtwebkit"
+fi
+
 if [[ "$ARCH" = "x86_64" ]] ; then
-    APPIMAGE=$APP"-"$DK_RELEASEID$DK_EPOCH"-x86-64$DEBUG_SUF.appimage"
+    APPIMAGE=$APP"-"$DK_RELEASEID$DK_EPOCH$WEB_BROWSER"-x86-64$DEBUG_SUF.appimage"
 elif [[ "$ARCH" = "i686" ]] ; then
-    APPIMAGE=$APP"-"$DK_RELEASEID$DK_EPOCH"-i386$DEBUG_SUF.appimage"
+    APPIMAGE=$APP"-"$DK_RELEASEID$DK_EPOCH$WEB_BROWSER"-i386$DEBUG_SUF.appimage"
 fi
 
 echo -e "---------- Create Bundle with AppImage SDK stage1\n"
@@ -393,15 +445,13 @@ if [[ ! -s ./functions.sh ]] ; then
     wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./functions.sh
 fi
 
-. ./functions.sh
-
 # Install desktopintegration in usr/bin/digikam.wrapper
 cd $APP_IMG_DIR
 
 # We will use a dedicated bash script to run inside the AppImage to be sure that XDG_* variable are set for Qt5
 cp ${ORIG_WD}/data/AppRun ./
 
-# desktop integration rules
+# desktop integration files
 
 cp /usr/share/applications/org.kde.digikam.desktop ./digikam.desktop
 cp /usr/share/icons/hicolor/64x64/apps/digikam.png ./digikam.png
@@ -411,9 +461,6 @@ cp -r /usr/share/icons/hicolor/128x128/apps/digikam.png ./usr/share/icons/defaul
 
 mkdir -p $APP_IMG_DIR/usr/share/icons/default/128x128/mimetypes
 cp -r /usr/share/icons/hicolor/128x128/apps/digikam.png ./usr/share/icons/default/128x128/mimetypes/application-vnd.digikam.png
-
-# TODO: this AppImage sdk API is obsolete.
-#get_desktopintegration digikam
 
 mkdir -p $ORIG_WD/bundle
 rm -f $ORIG_WD/bundle/* || true
@@ -483,14 +530,14 @@ if [[ $DK_UPLOAD = 1 ]] ; then
     echo -e "---------- Cleanup older bundle AppImage files from files.kde.org repository \n"
 
     if [[ "$ARCH" = "x86_64" ]] ; then
-        ssh $DK_UPLOADURL rm -f $DK_UPLOADDIR*-x86-64*.appimage*
+        ssh $DK_UPLOADURL rm -f $DK_UPLOADDIR*$WEB_BROWSER-x86-64*.appimage*
     elif [[ "$ARCH" = "i686" ]] ; then
-        ssh $DK_UPLOADURL rm -f $DK_UPLOADDIR*-i386*.appimage*
+        ssh $DK_UPLOADURL rm -f $DK_UPLOADDIR*$WEB_BROWSER-i386*.appimage*
     fi
 
     echo -e "---------- Upload new bundle AppImage files to files.kde.org repository \n"
 
-    scp $ORIG_WD/bundle/$APPIMAGE     $DK_UPLOADURL:$DK_UPLOADDIR
+    rsync -r -v --progress -e ssh $ORIG_WD/bundle/$APPIMAGE     $DK_UPLOADURL:$DK_UPLOADDIR
     scp $ORIG_WD/bundle/$APPIMAGE.sum $DK_UPLOADURL:$DK_UPLOADDIR
 
     if [[ $DK_SIGN = 1 ]] ; then

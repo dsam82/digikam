@@ -1,6 +1,6 @@
 ![](https://c1.staticflickr.com/1/822/26082076957_5ff0796a99_o.png) digiKam - Professional Photo Management with the Power of Open Source
 
-[![Phabricator Build Status](https://build.kde.org/job/Extragear%20digikam%20kf5-qt5%20SUSEQt5.9/badge/icon)](https://build.kde.org/job/Extragear%20digikam%20kf5-qt5%20SUSEQt5.9/)
+[![Phabricator Build Status](https://build.kde.org/job/Extragear/job/digikam/job/kf5-qt5%20SUSEQt5.10/badge/icon)](https://build.kde.org/job/Extragear/job/digikam/job/kf5-qt5%20SUSEQt5.10/)
 
 If you are reading this on Github, be aware that this is just a mirror. Our real code repository [is located here](https://phabricator.kde.org/source/digikam/)
 
@@ -89,7 +89,7 @@ Extra Bugzilla servers for shared libs used by digiKam :
 * [LibRaw library](https://github.com/LibRaw/LibRaw/issues)
 * [Lensfun library](https://sourceforge.net/p/lensfun/_list/tickets)
 * [GPhoto2 library](http://gphoto.org/bugs)
-* [Exiv2 library](http://dev.exiv2.org/projects/exiv2/issues)
+* [Exiv2 library](https://github.com/Exiv2/exiv2/issues)
 * [QtAV library](https://github.com/wang-bin/QtAV/issues)
 
 # External Dependencies

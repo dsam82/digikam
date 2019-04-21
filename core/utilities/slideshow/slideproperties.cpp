@@ -51,11 +51,13 @@ class Q_DECL_HIDDEN SlideProperties::Private
 public:
 
     explicit Private()
-        : maxStringLen(80)
+        : maxStringLen(80),
+         paintEnabled(true)
     {
     }
 
     const int         maxStringLen;
+    bool              paintEnabled;
 
     QUrl              url;
 
@@ -63,10 +65,11 @@ public:
 };
 
 SlideProperties::SlideProperties(const SlideShowSettings& settings, QWidget* const parent)
-    : QWidget(parent), d(new Private)
+    : QWidget(parent),
+      d(new Private)
 {
     d->settings = settings;
-    setFixedSize(QApplication::desktop()->availableGeometry(parentWidget()).size()/2);
+    setFixedSize(QApplication::desktop()->availableGeometry(parentWidget()).size() / 1.5);
     setMouseTracking(true);
 }
 
@@ -83,7 +86,13 @@ void SlideProperties::setCurrentUrl(const QUrl& url)
 
 void SlideProperties::paintEvent(QPaintEvent*)
 {
+    if (!d->paintEnabled)
+    {
+        return;
+    }
+
     QPainter p(this);
+    p.setFont(d->settings.captionFont);
 
     DInfoInterface::DInfoMap info = d->settings.iface->itemInfo(d->url);
     DItemInfo item(info);
@@ -170,7 +179,7 @@ void SlideProperties::paintEvent(QPaintEvent*)
     if (d->settings.printExpoSensitivity)
     {
         str.clear();
-        
+
         QString exposureTime = item.exposureTime();
         QString sensitivity  = item.sensitivity();
 
@@ -359,6 +368,12 @@ void SlideProperties::printTags(QPainter& p, int& offset, QStringList& tags)
     {
         printInfoText(p, offset, str, qApp->palette().color(QPalette::Link).name());
     }
+}
+
+void SlideProperties::togglePaintEnabled()
+{
+    d->paintEnabled = !d->paintEnabled;
+    update();
 }
 
 } // namespace Digikam

@@ -223,7 +223,8 @@ bool PGFLoader::load(const QString& filePath, DImgLoaderObserver* const observer
                 break;
         }
 
-        if(DIGIKAM_DIMG_LOG_PGF().isDebugEnabled()) {
+        if (DIGIKAM_DIMG_LOG_PGF().isDebugEnabled())
+        {
             const PGFHeader* header = pgf.GetHeader();
             qCDebug(DIGIKAM_DIMG_LOG_PGF) << "PGF width    = " << header->width;
             qCDebug(DIGIKAM_DIMG_LOG_PGF) << "PGF height   = " << header->height;
@@ -491,7 +492,7 @@ bool PGFLoader::save(const QString& filePath, DImgLoaderObserver* const observer
             observer->progressInfo(m_image, 1.0);
         }
 
-        imageSetAttribute(QLatin1String("savedformat"), QLatin1String("PGF"));
+        imageSetAttribute(QLatin1String("savedFormat"), QLatin1String("PGF"));
         saveMetadata(filePath);
 
         return true;

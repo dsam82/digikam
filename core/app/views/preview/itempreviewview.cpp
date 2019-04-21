@@ -46,6 +46,7 @@
 
 #include "digikam_debug.h"
 #include "digikam_config.h"
+#include "digikam_globals.h"
 #include "itempreviewcanvas.h"
 #include "applicationsettings.h"
 #include "contextmenuhelper.h"
@@ -168,6 +169,7 @@ ItemPreviewView::ItemPreviewView(QWidget* const parent, Mode mode, Album* const 
 
     d->fullscreenAction    = new QAction(QIcon::fromTheme(QLatin1String("media-playback-start")), i18n("Show Fullscreen"), this);
     d->toolBar             = new QToolBar(this);
+    d->toolBar->setStyleSheet(toolButtonStyleSheet());
 
     if (mode == IconViewPreview)
     {
@@ -341,6 +343,7 @@ void ItemPreviewView::slotShowContextMenu(QGraphicsSceneContextMenuEvent* event)
 
     // --------------------------------------------------------
 
+    cmHelper.addAction(QLatin1String("image_scan_for_faces"));
     cmHelper.addAction(d->peopleToggleAction, true);
     cmHelper.addAction(d->addPersonAction,    true);
     cmHelper.addAction(d->forgetFacesAction,  true);
@@ -353,7 +356,6 @@ void ItemPreviewView::slotShowContextMenu(QGraphicsSceneContextMenuEvent* event)
 
     // --------------------------------------------------------
 
-    cmHelper.addAction(QLatin1String("image_scan_for_faces"));
     cmHelper.addAction(QLatin1String("image_find_similar"));
 
     if (d->mode == IconViewPreview)

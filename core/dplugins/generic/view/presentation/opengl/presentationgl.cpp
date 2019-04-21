@@ -159,7 +159,7 @@ PresentationGL::PresentationGL(PresentationContainer* const sharedData)
       d(new Private)
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowFlags(Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnTopHint | Qt::Popup);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Popup);
 
     QRect deskRect = QApplication::desktop()->screenGeometry(QApplication::activeWindow());
     d->deskX       = deskRect.x();
@@ -254,16 +254,31 @@ PresentationGL::PresentationGL(PresentationContainer* const sharedData)
     // -- hide cursor when not moved --------------------
 
     d->mouseMoveTimer = new QTimer(this);
+    d->mouseMoveTimer->setSingleShot(true);
 
     connect(d->mouseMoveTimer, SIGNAL(timeout()),
             this, SLOT(slotMouseMoveTimeOut()));
 
     setMouseTracking(true);
     slotMouseMoveTimeOut();
+
+#ifdef HAVE_MEDIAPLAYER
+
+    if (d->sharedData->soundtrackPlay)
+        d->playbackWidget->slotPlay();
+
+#endif
 }
 
 PresentationGL::~PresentationGL()
 {
+#ifdef HAVE_MEDIAPLAYER
+    d->playbackWidget->slotStop();
+#endif
+
+    d->timer->stop();
+    d->mouseMoveTimer->stop();
+
     d->texture[0]->destroy();
     d->texture[1]->destroy();
     d->texture[2]->destroy();
@@ -379,7 +394,6 @@ void PresentationGL::mousePressEvent(QMouseEvent* e)
 void PresentationGL::mouseMoveEvent(QMouseEvent* e)
 {
     setCursor(QCursor(Qt::ArrowCursor));
-    d->mouseMoveTimer->setSingleShot(true);
     d->mouseMoveTimer->start(1000);
 
     if (!d->slideCtrlWidget->canHide()
@@ -392,7 +406,7 @@ void PresentationGL::mouseMoveEvent(QMouseEvent* e)
     QPoint pos(e->pos());
 
     if ((pos.y() > (d->deskY + 20)) &&
-            (pos.y() < (d->deskY + d->deskHeight - 20 - 1)))
+        (pos.y() < (d->deskY + d->deskHeight - 20 - 1)))
     {
         if (d->slideCtrlWidget->isHidden()
 #ifdef HAVE_MEDIAPLAYER
@@ -408,6 +422,7 @@ void PresentationGL::mouseMoveEvent(QMouseEvent* e)
 #ifdef HAVE_MEDIAPLAYER
             d->playbackWidget->hide();
 #endif
+            setFocus();
         }
 
         return;
@@ -719,9 +734,9 @@ void PresentationGL::printComments(QImage& layer)
 
         commentsIndex = currIndex; // The line is ended
 
-        if ( commentsIndex != (uint) comments.length() )
+        if (commentsIndex != (uint) comments.length())
         {
-            while ( !newLine.endsWith(QLatin1Char(' ')) )
+            while (!newLine.endsWith(QLatin1Char(' ')))
             {
                 newLine.truncate(newLine.length() - 1);
                 commentsIndex--;
@@ -739,7 +754,7 @@ void PresentationGL::printComments(QImage& layer)
     bool   drawTextOutline = d->sharedData->commentsDrawOutline;
     int    opacity = d->sharedData->bgOpacity;
 
-    for ( int lineNumber = 0 ; lineNumber < (int)commentsByLines.count() ; ++lineNumber )
+    for (int lineNumber = 0 ; lineNumber < (int)commentsByLines.count() ; ++lineNumber)
     {
         QPixmap pix = generateCustomOutlinedTextPixmap(commentsByLines[lineNumber],
                                                        font, fgColor, bgColor, opacity, drawTextOutline);
@@ -859,7 +874,6 @@ void PresentationGL::slotTimeOut()
 
     update();
 
-    d->timer->setSingleShot(true);
     d->timer->start(d->timeout);
 }
 
@@ -867,8 +881,13 @@ void PresentationGL::slotMouseMoveTimeOut()
 {
     QPoint pos(QCursor::pos());
 
-    if ((pos.y() < (d->deskY + 20)) ||
-            (pos.y() > (d->deskY + d->deskHeight - 20 - 1)))
+    if ((pos.y() < (d->deskY + 20))                     ||
+        (pos.y() > (d->deskY + d->deskHeight - 20 - 1)) ||
+        d->slideCtrlWidget->underMouse()
+#ifdef HAVE_MEDIAPLAYER
+        || d->playbackWidget->underMouse()
+#endif
+       )
         return;
 
     setCursor(QCursor(Qt::BlankCursor));
@@ -1661,7 +1680,7 @@ QPixmap PresentationGL::generateCustomOutlinedTextPixmap(const QString& text, QF
     QPixmap pix(rect.width(), rect.height());
     pix.fill(Qt::transparent);
 
-    if(opacity > 0)
+    if (opacity > 0)
     {
         QPainter pbg(&pix);
         pbg.setBrush(bgColor);
@@ -1695,6 +1714,26 @@ QPixmap PresentationGL::generateCustomOutlinedTextPixmap(const QString& text, QF
     p.end();
 
     return pix;
+}
+
+bool PresentationGL::checkOpenGL() const
+{
+    // No OpenGL context is found. Are the drivers ok?
+    if (!isValid())
+    {
+        return false;
+    }
+
+    // GL_EXT_texture3D is not supported
+    QString s = QString::fromLatin1(reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS)));
+
+    if (!s.contains(QString::fromLatin1("GL_EXT_texture3D"), Qt::CaseInsensitive))
+    {
+        return false;
+    }
+
+    // Everything is ok!
+    return true;
 }
 
 } // namespace DigikamGenericPresentationPlugin

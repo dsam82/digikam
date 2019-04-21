@@ -13,6 +13,12 @@ DOWNLOAD_DIR="/d"
 # Absolute path where are compiled all tarballs
 BUILDING_DIR="/b"
 
+# Absolute path where are installed all software components
+INSTALL_DIR="/usr"
+
+# Absolute path where are bundled all software components
+APP_IMG_DIR="/digikam.appdir"
+
 ########################################################################
 
 # URL to git repository to checkout digiKam source code
@@ -26,9 +32,9 @@ DK_BUILDTEMP=$BUILDING_DIR/dktemp
 # digiKam tag version from git. Official tarball do not include extra shared libraries.
 # The list of tags can be listed with this url: https://quickgit.kde.org/?p=digikam.git&a=tags
 # If you want to package current implemntation from git, use "master" as tag.
-#DK_VERSION=v6.0.0
+#DK_VERSION=v5.5.0
 DK_VERSION=master
-#DK_VERSION=development/dplugins
+#DK_VERSION=gsoc18-exporttools-o2
 
 # Installer sub version to differentiates newer updates of the installer itself, even if the underlying application hasn’t changed.
 #DK_EPOCH="-01"
@@ -37,6 +43,9 @@ DK_EPOCH="-`date "+%Y%m%dT%H%M%S"`"
 
 # Installer will include or not digiKam debug symbols
 DK_DEBUG=1
+
+# Option to use QtWebEngine instead QtWebkit
+DK_QTWEBENGINE=0
 
 # Sign bundles with GPG. Passphrase must be hosted in ~/.gnupg/dkorg-gpg-pwd.txt
 DK_SIGN=0

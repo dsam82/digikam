@@ -70,7 +70,7 @@ QString PPlugin::description() const
 QString PPlugin::details() const
 {
     return i18n("<p>This tool permit to export items to Pinterest web-service.</p>"
-                "<p>See Box web site for details: <a href='https://www.pinterest.com/'>https://www.pinterest.com/</a></p>");
+                "<p>See Pinterest web site for details: <a href='https://www.pinterest.com/'>https://www.pinterest.com/</a></p>");
 }
 
 QList<DPluginAuthor> PPlugin::authors() const
@@ -89,7 +89,7 @@ void PPlugin::setup(QObject* const parent)
     ac->setText(i18nc("@action", "Export to &Pinterest..."));
     ac->setObjectName(QLatin1String("export_pinterest"));
     ac->setActionCategory(DPluginAction::GenericExport);
-    ac->setShortcut(Qt::ALT + Qt::SHIFT + Qt::CTRL + Qt::Key_I);
+    ac->setShortcut(Qt::CTRL + Qt::ALT + Qt::SHIFT + Qt::Key_I);
 
     connect(ac, SIGNAL(triggered(bool)),
             this, SLOT(slotPinterest()));

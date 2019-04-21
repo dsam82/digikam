@@ -300,7 +300,7 @@ void SlideShow::slotLoadNextItem()
         QMimeDatabase mimeDB;
 
         if (mimeDB.mimeTypeForFile(currentItem().toLocalFile())
-                                   .name().startsWith(QLatin1String("video/")))
+                                  .name().startsWith(QLatin1String("video/")))
         {
             d->videoView->setCurrentUrl(currentItem());
             return;
@@ -344,7 +344,7 @@ void SlideShow::slotLoadPrevItem()
         QMimeDatabase mimeDB;
 
         if (mimeDB.mimeTypeForFile(currentItem().toLocalFile())
-                                   .name().startsWith(QLatin1String("video/")))
+                                  .name().startsWith(QLatin1String("video/")))
         {
             d->videoView->setCurrentUrl(currentItem());
             return;
@@ -378,10 +378,16 @@ void SlideShow::slotImageLoaded(bool loaded)
     else
     {
 #ifdef HAVE_MEDIAPLAYER
-        // Try to load item as video
-        d->videoView->setCurrentUrl(currentItem());
+        // Try to load only GIF Images
+        QMimeDatabase mimeDB;
+
+        if (mimeDB.mimeTypeForFile(currentItem().toLocalFile())
+                                  .name() == QLatin1String("image/gif"))
+        {
+            d->videoView->setCurrentUrl(currentItem());
+        }
 #else
-        slotVideoLoaded(false);
+        preloadNextItem();
 #endif
     }
 }
@@ -509,6 +515,12 @@ void SlideShow::keyPressEvent(QKeyEvent* e)
 {
     if (!e)
     {
+        return;
+    }
+
+    if (e->key() == Qt::Key_F4)
+    {
+        d->osd->toggleProperties();
         return;
     }
 

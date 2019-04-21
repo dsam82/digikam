@@ -569,7 +569,7 @@ void ImportUI::setupActions()
     d->zoomFitToWindowAction = new QAction(QIcon::fromTheme(QLatin1String("zoom-fit-best")), i18nc("@action:inmenu", "Fit to &Window"), this);
     connect(d->zoomFitToWindowAction, SIGNAL(triggered()), d->view, SLOT(slotFitToWindow()));
     ac->addAction(QLatin1String("import_zoomfit2window"), d->zoomFitToWindowAction);
-    ac->setDefaultShortcut(d->zoomFitToWindowAction, Qt::ALT + Qt::CTRL + Qt::Key_E);
+    ac->setDefaultShortcut(d->zoomFitToWindowAction, Qt::CTRL + Qt::ALT + Qt::Key_E);
 
     d->zoomTo100percents = new QAction(QIcon::fromTheme(QLatin1String("zoom-original")), i18nc("@action:inmenu", "Zoom to 100%"), this);
     connect(d->zoomTo100percents, SIGNAL(triggered()), d->view, SLOT(slotZoomTo100Percents()));
@@ -599,7 +599,7 @@ void ImportUI::setupActions()
     d->showBarAction->setCheckable(true);
     connect(d->showBarAction, SIGNAL(triggered()), this, SLOT(slotToggleShowBar()));
     ac->addAction(QLatin1String("showthumbs"), d->showBarAction);
-    ac->setDefaultShortcut(d->showBarAction, Qt::CTRL+Qt::Key_T);
+    ac->setDefaultShortcut(d->showBarAction, Qt::CTRL + Qt::Key_T);
     d->showBarAction->setEnabled(false);
 
     // ---------------------------------------------------------------------------------
@@ -853,7 +853,7 @@ void ImportUI::setupAccelerators()
     QAction* const previousImageAction = new QAction(i18nc("@action", "Previous Image"), this);
     previousImageAction->setIcon(QIcon::fromTheme(QLatin1String("go-previous")));
     ac->addAction(QLatin1String("previous_image"), previousImageAction);
-    ac->setDefaultShortcuts(previousImageAction, QList<QKeySequence>() << Qt::Key_Backspace << Qt::SHIFT+Qt::Key_Space);
+    ac->setDefaultShortcuts(previousImageAction, QList<QKeySequence>() << Qt::Key_Backspace << Qt::SHIFT + Qt::Key_Space);
     connect(previousImageAction, SIGNAL(triggered()), d->view, SLOT(slotPrevItem()));
 
     QAction* const firstImageAction = new QAction(i18nc("@action Go to first image", "First Image"), this);

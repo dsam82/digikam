@@ -179,12 +179,12 @@ public:
 };
 
 PresentationWidget::PresentationWidget(PresentationContainer* const sharedData)
-    : QWidget(0, Qt::WindowStaysOnTopHint | Qt::Popup | Qt::X11BypassWindowManagerHint),
+    : QWidget(),
       d(new Private)
 {
     setAttribute(Qt::WA_DeleteOnClose);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Popup);
 
-    d->sharedData   = sharedData;
     QRect deskRect  = QApplication::desktop()->screenGeometry(QApplication::activeWindow());
     d->deskX        = deskRect.x();
     d->deskY        = deskRect.y();
@@ -193,6 +193,8 @@ PresentationWidget::PresentationWidget(PresentationContainer* const sharedData)
 
     move(d->deskX, d->deskY);
     resize(d->deskWidth, d->deskHeight);
+
+    d->sharedData   = sharedData;
 
     d->slideCtrlWidget = new PresentationCtrlWidget(this);
     d->slideCtrlWidget->hide();
@@ -288,21 +290,31 @@ PresentationWidget::PresentationWidget(PresentationContainer* const sharedData)
 
     // -- hide cursor when not moved --------------------
 
-    d->mouseMoveTimer = new QTimer;
+    d->mouseMoveTimer = new QTimer(this);
+    d->mouseMoveTimer->setSingleShot(true);
 
     connect(d->mouseMoveTimer, SIGNAL(timeout()),
             this, SLOT(slotMouseMoveTimeOut()));
 
     setMouseTracking(true);
     slotMouseMoveTimeOut();
+
+#ifdef HAVE_MEDIAPLAYER
+
+    if (d->sharedData->soundtrackPlay)
+        d->playbackWidget->slotPlay();
+
+#endif
 }
 
 PresentationWidget::~PresentationWidget()
 {
+#ifdef HAVE_MEDIAPLAYER
+    d->playbackWidget->slotStop();
+#endif
+
     d->timer->stop();
-    delete d->timer;
     d->mouseMoveTimer->stop();
-    delete d->mouseMoveTimer;
 
     if (d->intArray)
         delete [] d->intArray;
@@ -601,7 +613,6 @@ void PresentationWidget::mousePressEvent(QMouseEvent* e)
 void PresentationWidget::mouseMoveEvent(QMouseEvent* e)
 {
     setCursor(QCursor(Qt::ArrowCursor));
-    d->mouseMoveTimer->setSingleShot(true);
     d->mouseMoveTimer->start(1000);
 
     if (!d->slideCtrlWidget->canHide()
@@ -691,8 +702,13 @@ void PresentationWidget::slotMouseMoveTimeOut()
 {
     QPoint pos(QCursor::pos());
 
-    if ((pos.y() < (d->deskY + 20)) ||
-        (pos.y() > (d->deskY + d->deskHeight - 20 - 1)))
+    if ((pos.y() < (d->deskY + 20))                     ||
+        (pos.y() > (d->deskY + d->deskHeight - 20 - 1)) ||
+        d->slideCtrlWidget->underMouse()
+#ifdef HAVE_MEDIAPLAYER
+        || d->playbackWidget->underMouse()
+#endif
+       )
         return;
 
     setCursor(QCursor(Qt::BlankCursor));
@@ -924,8 +940,6 @@ void PresentationWidget::slotTimeOut()
         tmout            = d->sharedData->delay;
         d->effectRunning = false;
     }
-
-    d->timer->setSingleShot(true);
 
     d->timer->start(tmout);
 }

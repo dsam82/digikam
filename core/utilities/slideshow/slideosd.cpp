@@ -99,7 +99,8 @@ SlideOSD::SlideOSD(const SlideShowSettings& settings, SlideShow* const parent)
     : QWidget(parent),
       d(new Private)
 {
-    Qt::WindowFlags flags = Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
+    Qt::WindowFlags flags = Qt::FramelessWindowHint  |
+                            Qt::WindowStaysOnTopHint |
                             Qt::X11BypassWindowManagerHint;
 
     setWindowFlags(flags);
@@ -363,6 +364,11 @@ bool SlideOSD::isUnderMouse() const
             d->clWidget->underMouse()     ||
             d->plWidget->underMouse()     ||
             d->toolBar->underMouse());
+}
+
+void SlideOSD::toggleProperties()
+{
+    d->slideProps->togglePaintEnabled();
 }
 
 } // namespace Digikam

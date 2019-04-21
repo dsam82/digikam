@@ -3,12 +3,10 @@
  * This file is a part of digiKam project
  * https://www.digikam.org
  *
- * Date        : 2005-21-11
- * Description : A 16 bits/color/pixel PPM IO file for
- *               DImg framework
+ * Date        : 2019-04-19
+ * Description : ImageMagick loader for DImg framework.
  *
- * Copyright (C) 2005      by Renchi Raju <renchi dot raju at gmail dot com>
- * Copyright (C) 2005-2019 by Gilles Caulier <caulier dot gilles at gmail dot com>
+ * Copyright (C) 2019 by Caulier Gilles <caulier dot gilles at gmail dot com>
  *
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
@@ -23,32 +21,37 @@
  *
  * ============================================================ */
 
-#ifndef DIGIKAM_PPM_LOADER_H
-#define DIGIKAM_PPM_LOADER_H
+#ifndef DIGIKAM_IMAGEMAGICK_LOADER_H
+#define DIGIKAM_IMAGEMAGICK_LOADER_H
 
 // Local includes
 
 #include "dimgloader.h"
 #include "digikam_export.h"
+#include "digikam_config.h"
 
 namespace Digikam
 {
 class DImg;
 
-class DIGIKAM_EXPORT PPMLoader : public DImgLoader
+class DIGIKAM_EXPORT MagickLoader : public DImgLoader
 {
 public:
 
-    explicit PPMLoader(DImg* const image);
+    explicit MagickLoader(DImg* const image);
 
-    bool load(const QString& filePath, DImgLoaderObserver* const observer);
-    bool save(const QString& filePath, DImgLoaderObserver* const observer);
+    virtual bool load(const QString& filePath, DImgLoaderObserver* const observer);
+    virtual bool save(const QString& filePath, DImgLoaderObserver* const observer);
 
     virtual bool hasAlpha()   const;
     virtual bool sixteenBit() const;
     virtual bool isReadOnly() const;
+
+private:
+
+    bool m_hasAlpha;
 };
 
 } // namespace Digikam
 
-#endif // DIGIKAM_PPM_LOADER_H
+#endif // DIGIKAM_IMAGEMAGICK_LOADER_H

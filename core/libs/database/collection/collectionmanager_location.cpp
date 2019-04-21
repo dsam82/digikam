@@ -291,7 +291,7 @@ CollectionManager::LocationCheckResult CollectionManager::checkLocation(const QU
             {
                 bool hasOtherLocation = false;
 
-                foreach(AlbumRootLocation* const otherLocation, d->locations)
+                foreach (AlbumRootLocation* const otherLocation, d->locations)
                 {
                     QUrl otherUrl(otherLocation->identifier);
 
@@ -485,7 +485,7 @@ QList<CollectionLocation> CollectionManager::checkHardWiredLocations()
 
     CoreDbAccess access;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
         // Hardwired and unavailable?
         if (location->type()   == CollectionLocation::TypeVolumeHardWired &&
@@ -521,7 +521,7 @@ void CollectionManager::migrationCandidates(const CollectionLocation& location,
     *description = d->technicalDescription(albumLoc);
 
     // Find possible new volumes where the specific path is found.
-    foreach(const SolidVolumeInfo& info, volumes)
+    foreach (const SolidVolumeInfo& info, volumes)
     {
         if (info.isMounted && !info.path.isEmpty())
         {
@@ -603,7 +603,7 @@ QList<CollectionLocation> CollectionManager::allLocations()
     CoreDbAccess access;
     QList<CollectionLocation> list;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
         list << *location;
     }
@@ -616,7 +616,7 @@ QList<CollectionLocation> CollectionManager::allAvailableLocations()
     CoreDbAccess access;
     QList<CollectionLocation> list;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
         if (location->status() == CollectionLocation::LocationAvailable)
         {
@@ -648,7 +648,11 @@ CollectionLocation CollectionManager::locationForAlbumRoot(const QUrl& fileUrl)
 
 CollectionLocation CollectionManager::locationForAlbumRootPath(const QString& albumRootPath)
 {
-    if (!QFileInfo::exists(albumRootPath))
+    // This function is used when an album is created or an external scan is
+    // initiated by the AlbumWatcher. We check to see if the trash exists
+    // because the mount path of a network share may always be available.
+
+    if (!QFileInfo::exists(albumRootPath + QLatin1String("/.dtrash")))
     {
         qCWarning(DIGIKAM_DATABASE_LOG) << "Album root path not exist" << albumRootPath;
         qCWarning(DIGIKAM_DATABASE_LOG) << "Drive or network connection broken?";
@@ -658,7 +662,7 @@ CollectionLocation CollectionManager::locationForAlbumRootPath(const QString& al
 
     CoreDbAccess access;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
         if (location->albumRootPath() == albumRootPath)
         {
@@ -678,7 +682,7 @@ CollectionLocation CollectionManager::locationForPath(const QString& givenPath)
 {
     CoreDbAccess access;
 
-    foreach(AlbumRootLocation* const location, d->locations)
+    foreach (AlbumRootLocation* const location, d->locations)
     {
         QString rootPath = location->albumRootPath();
         QString filePath = QDir::fromNativeSeparators(givenPath);
@@ -715,7 +719,7 @@ void CollectionManager::updateLocations()
         QMap<int, AlbumRootLocation*> locs = d->locations;
         d->locations.clear();
 
-        foreach(const AlbumRootInfo& info, infos)
+        foreach (const AlbumRootInfo& info, infos)
         {
             if (locs.contains(info.id))
             {
@@ -729,7 +733,7 @@ void CollectionManager::updateLocations()
         }
 
         // delete old locations
-        foreach(AlbumRootLocation* const location, locs)
+        foreach (AlbumRootLocation* const location, locs)
         {
             CollectionLocation::Status oldStatus = location->status();
             location->setStatus(CollectionLocation::LocationDeleted);
@@ -740,7 +744,7 @@ void CollectionManager::updateLocations()
         // update status with current access state, store old status in list
         QList<CollectionLocation::Status> oldStatus;
 
-        foreach(AlbumRootLocation* const location, d->locations)
+        foreach (AlbumRootLocation* const location, d->locations)
         {
             oldStatus << location->status();
             bool available = false;
@@ -748,7 +752,7 @@ void CollectionManager::updateLocations()
 
             if (location->type() == CollectionLocation::TypeNetwork)
             {
-                foreach(const QString& path, d->networkShareMountPathsFromIdentifier(location))
+                foreach (const QString& path, d->networkShareMountPathsFromIdentifier(location))
                 {
                     QDir dir(path);
                     available    = dir.isReadable() &&
@@ -803,7 +807,7 @@ void CollectionManager::updateLocations()
         // emit status changes (and new locations)
         int i = 0;
 
-        foreach(AlbumRootLocation* const location, d->locations)
+        foreach (AlbumRootLocation* const location, d->locations)
         {
             if (oldStatus.at(i) != location->status())
             {

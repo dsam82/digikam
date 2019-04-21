@@ -355,6 +355,14 @@ bool ItemQueryBuilder::buildField(QString& sql, SearchXmlCachingReader& reader, 
             *boundValues << tagname << tagname;
         }
     }
+    else if (name == QLatin1String("nottagged"))
+    {
+        reader.readToEndOfElement();
+        sql += QString::fromUtf8(" (Images.id NOT IN (SELECT imageid FROM ImageTags "
+               "    WHERE tagid NOT IN (SELECT id FROM Tags "
+               "    WHERE pid IN (SELECT id FROM Tags "
+               "    WHERE name = '_Digikam_Internal_Tags_') ))) ");
+    }
     else if (name == QLatin1String("notag"))
     {
         reader.readToEndOfElement();
@@ -446,18 +454,18 @@ bool ItemQueryBuilder::buildField(QString& sql, SearchXmlCachingReader& reader, 
         QString query;
         QString readerString = (reader.valueToStringOrStringList()).at(0);
 
-        if(readerString.contains(QRegExp(QLatin1String("^\\d+:\\d+$"))))
+        if (readerString.contains(QRegExp(QLatin1String("^\\d+:\\d+$"))))
         {
             QStringList ratioNum = readerString.split(QLatin1Char(':'), QString::SkipEmptyParts);
             int num              = ratioNum.at(0).toInt();
             int denominator = ratioNum.at(1).toInt();
-            query                = QString::fromUtf8("abs((ImageInformation.width/CAST(ImageInformation.height as REAL)) - ?)  < 0.1");
+            query                = QString::fromUtf8("ABS((ImageInformation.width/CAST(ImageInformation.height AS DOUBLE)) - ?)  < 0.1");
             sql                 += QString::fromUtf8(" (") + query + QString::fromUtf8(") ");
             *boundValues << (double)num/denominator;
         }
-        else if(readerString.contains(QRegExp(QLatin1String("^\\d+(.\\d+)?$"))))
+        else if (readerString.contains(QRegExp(QLatin1String("^\\d+(.\\d+)?$"))))
         {
-            query = QString::fromUtf8("abs((ImageInformation.width/CAST(ImageInformation.height as REAL)) - ?)  < 0.1");
+            query = QString::fromUtf8("ABS((ImageInformation.width/CAST(ImageInformation.height AS DOUBLE)) - ?)  < 0.1");
             sql  += QString::fromUtf8(" (") + query + QString::fromUtf8(") ");
             *boundValues << readerString.toDouble();
         }
@@ -512,7 +520,7 @@ bool ItemQueryBuilder::buildField(QString& sql, SearchXmlCachingReader& reader, 
             sql += QString::fromUtf8("(VideoMetadata.aspectRatio IN (");
             CoreDB::addBoundValuePlaceholders(sql, values.size());
             sql += QString::fromUtf8(") ");
-            QString query = QString::fromUtf8("abs((CAST(VideoMetadata.aspectRatio as REAL) - ?)  < 0.1) ");
+            QString query = QString::fromUtf8("ABS((CAST(VideoMetadata.aspectRatio AS DOUBLE) - ?)  < 0.1) ");
 
             foreach (double value, ratioValues)
             {
@@ -535,7 +543,7 @@ bool ItemQueryBuilder::buildField(QString& sql, SearchXmlCachingReader& reader, 
                 *boundValues << (double)num/denominator;
             }
 
-            sql += QString::fromUtf8("(VideoMetadata.aspectRatio=? OR abs((CAST(VideoMetadata.aspectRatio as REAL) - ?)  < 0.1 )) ");
+            sql += QString::fromUtf8("(VideoMetadata.aspectRatio=? OR ABS((CAST(VideoMetadata.aspectRatio AS DOUBLE) - ?)  < 0.1 )) ");
         }
     }
     else if (name == QLatin1String("videoaudiobitrate"))
@@ -643,10 +651,10 @@ bool ItemQueryBuilder::buildField(QString& sql, SearchXmlCachingReader& reader, 
             return false;
         }
 
-        sql += QString::fromUtf8(" ( CAST(VideoMetadata.frameRate AS REAL)");
+        sql += QString::fromUtf8(" ( CAST(VideoMetadata.frameRate AS DOUBLE)");
         ItemQueryBuilder::addSqlRelation(sql,
                                           relation == SearchXml::Interval ? SearchXml::GreaterThanOrEqual : SearchXml::GreaterThan);
-        sql += QString::fromUtf8(" ? AND CAST(VideoMetadata.frameRate AS REAL)");
+        sql += QString::fromUtf8(" ? AND CAST(VideoMetadata.frameRate AS DOUBLE)");
         ItemQueryBuilder::addSqlRelation(sql,
                                           relation == SearchXml::Interval ? SearchXml::LessThanOrEqual : SearchXml::LessThan);
         sql += QString::fromUtf8(" ?) ");
@@ -1283,7 +1291,7 @@ QString ItemQueryBuilder::buildQueryFromUrl(const QUrl& url, QList<QVariant>* bo
     SubQueryBuilder subQuery;
     QStringList     strList = url.path().split(QLatin1Char(' '), QString::SkipEmptyParts);
 
-    for ( QStringList::const_iterator it = strList.constBegin(); it != strList.constEnd(); ++it )
+    for (QStringList::const_iterator it = strList.constBegin() ; it != strList.constEnd() ; ++it)
     {
         bool ok;
         int  num = (*it).toInt(&ok);
@@ -1327,12 +1335,12 @@ QString ItemQueryBuilder::buildQueryFromUrl(const QUrl& url, QList<QVariant>* bo
                     sqlQuery += QLatin1Char('(');
                     QList<SKey>::const_iterator it = todo.constBegin();
 
-                    while ( it != todo.constEnd() )
+                    while (it != todo.constEnd())
                     {
                         sqlQuery += subQuery.build(*it, rule.op, rule.val, boundValues);
                         ++it;
 
-                        if ( it != todo.constEnd() )
+                        if (it != todo.constEnd())
                         {
                             sqlQuery += QLatin1String(" OR ");
                         }

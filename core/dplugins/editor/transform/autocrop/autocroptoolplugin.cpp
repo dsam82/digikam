@@ -69,7 +69,7 @@ QString AutoCropToolPlugin::description() const
 
 QString AutoCropToolPlugin::details() const
 {
-    return i18n("<p>This Image Editor tool can crop automatically an image by detection of inner black border,"
+    return i18n("<p>This Image Editor tool can crop automatically an image by detection of inner black border, "
                 "generated while panorama stitching for example.</p>");
 }
 
@@ -92,7 +92,7 @@ void AutoCropToolPlugin::setup(QObject* const parent)
     ac->setText(i18nc("@action", "&Auto-Crop"));
     ac->setObjectName(QLatin1String("editorwindow_transform_autocrop"));
     ac->setWhatsThis(i18n("This option can be used to crop automatically the image."));
-    ac->setShortcut(Qt::SHIFT + Qt::CTRL + Qt::Key_X);
+    ac->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_X);
     ac->setActionCategory(DPluginAction::EditorTransform);
 
     connect(ac, SIGNAL(triggered(bool)),

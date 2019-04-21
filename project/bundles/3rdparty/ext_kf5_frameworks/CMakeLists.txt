@@ -49,6 +49,7 @@ function(InstallKF5Component
                             DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
                             URL file://${EXTERNALS_DOWNLOAD_DIR}/${name}-${version}.0.tar.xz
                             URL_MD5 ${md5sm}
+
                             INSTALL_DIR ${EXTPREFIX_frameworks}
 
                             CMAKE_ARGS -DMXE_TOOLCHAIN=${MXE_TOOLCHAIN}
@@ -197,11 +198,11 @@ function(InstallKF5Component
 endfunction()
 
 if(MINGW)
-    set(KF5_VERSION 5.55) # we have Qt 5.12 available
+    set(KF5_VERSION 5.56) # we have Qt 5.12.1 available.
 elseif(APPLE)
-    set(KF5_VERSION 5.54) # we have Qt 5.9.7 available for backward compatibily with older MacOS
+    set(KF5_VERSION 5.56) # we have Qt 5.11.3 available.
 else()
-    set(KF5_VERSION 5.55) # we have Qt 5.11.3 available.
+    set(KF5_VERSION 5.56) # we have Qt 5.11.3 available.
 endif()
 
 if(APPLE)
@@ -212,7 +213,7 @@ endif()
 InstallKF5Component(extra-cmake-modules ${KF5_VERSION} ""                                                                   "")
 InstallKF5Component(kconfig             ${KF5_VERSION} ""                                                                   "")
 InstallKF5Component(breeze-icons        ${KF5_VERSION} "-DBINARY_ICONS_RESOURCE=OFF"                                        "${MacosBreezePatch}")
-InstallKF5Component(solid               ${KF5_VERSION} ""                                                                   "")
+InstallKF5Component(solid               ${KF5_VERSION} ""                                                                   "solid-deprecated.patch")
 InstallKF5Component(kcoreaddons         ${KF5_VERSION} ""                                                                   "")
 InstallKF5Component(threadweaver        ${KF5_VERSION} ""                                                                   "${MacosThreadWeaverPatch}")
 InstallKF5Component(kwindowsystem       ${KF5_VERSION} ""                                                                   "")

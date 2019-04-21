@@ -7,70 +7,93 @@
 #
 
 SET(EXTPREFIX_qt "${EXTPREFIX}")
-SET(QT_VERSION 5.11.3)
 
-IF (${QT_VERSION} STREQUAL "5.6.3")
-
-    INCLUDE("config-5.6.3-linux.cmake")
-
-    ExternalProject_Add(ext_qt
-        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL https://download.qt.io/official_releases/qt/5.6/5.6.3/single/qt-everywhere-opensource-src-5.6.3.tar.xz
-        URL_MD5 010342d515b62ee1c0e709254f4ef9ab
-
-        PATCH_COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/qt563-appimage-support.patch
-
-        CONFIGURE_COMMAND <SOURCE_DIR>/configure ${QT_CONFIG}
-
-        BUILD_COMMAND make -j
-
-        UPDATE_COMMAND ""
-        BUILD_IN_SOURCE 1
-        ALWAYS 0
-    )
-
-ELSEIF(${QT_VERSION} STREQUAL "5.9.7")
-
-    INCLUDE("config-5.9.7-linux.cmake")
-
-    ExternalProject_Add(ext_qt
-        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL https://download.qt.io/official_releases/qt/5.9/5.9.7/single/qt-everywhere-opensource-src-5.9.7.tar.xz
-        URL_MD5 70e617aeb1f9bbf84a12b8cf09b01ece
-
-        PATCH_COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/qt597-appimage-support.patch
-
-        CONFIGURE_COMMAND <SOURCE_DIR>/configure ${QT_CONFIG}
-
-        BUILD_COMMAND make -j
-
-        UPDATE_COMMAND ""
-        BUILD_IN_SOURCE 1
-        ALWAYS 0
-    )
-
-ELSEIF(${QT_VERSION} STREQUAL "5.11.3")
-
-    INCLUDE("config-5.11.3-linux.cmake")
-
-    ExternalProject_Add(ext_qt
-        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL https://download.qt.io/official_releases/qt/5.11/5.11.3/single/qt-everywhere-src-5.11.3.tar.xz
-        URL_MD5 02b353bfe7a40a8dc4274e1d17226d2b
-
-        PATCH_COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/qt5113-appimage-support.patch
-
-        CONFIGURE_COMMAND <SOURCE_DIR>/configure ${QT_CONFIG}
-
-        BUILD_COMMAND make -j
-
-        UPDATE_COMMAND ""
-        BUILD_IN_SOURCE 1
-        ALWAYS 0
-    )
-
-ELSE()
-
-    MESSAGE(FATAL_ERROR "Qt version to install not supported !")
-
+IF(NOT ENABLE_QTWEBENGINE)
+    SET(DROP_QTWEBENGINE_DEPS
+        -skip qtwebengine                 # No need Chromium browser support (QtWebkit instead)
+        -skip qtwebchannel                # QtWebChannel support ==> QWebEngine dependency
+        -skip qtquickcontrols             # QtQuick support      ==> QWebEngine dependency
+        )
 ENDIF()
+
+ExternalProject_Add(ext_qt
+    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+    URL https://download.qt.io/official_releases/qt/5.11/5.11.3/single/qt-everywhere-src-5.11.3.tar.xz
+    URL_MD5 02b353bfe7a40a8dc4274e1d17226d2b
+
+    PATCH_COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/qt-appimage-support.patch &&
+                  ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/qt-appimage-glibc.patch
+
+    CMAKE_ARGS -DOPENSSL_LIBS='-L${EXTPREFIX_qt}/lib -lssl -lcrypto'
+
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure
+                  -prefix ${EXTPREFIX_qt}
+                  -verbose
+                  -release
+                  -opensource
+                  -confirm-license
+                  -sql-sqlite                       # Compile Sqlite SQL plugin
+                  -sql-mysql                        # Compile Mysql SQL plugin
+                  -fontconfig
+                  -iconv                            # iconv is used instead icu
+                  -system-freetype                  # Use system font rendering lib https://doc.qt.io/qt-5/qtgui-attribution-freetype.html
+                  -openssl-linked                   # hard link ssl libraries
+                  -nomake tests                     # Do not build test codes
+                  -nomake examples                  # Do not build basis example codes
+                  -no-compile-examples              # Do not build extra example codes
+                  -no-qml-debug
+                  -no-mtdev
+                  -no-journald
+                  -no-syslog
+                  -no-tslib
+                  -no-directfb
+                  -no-linuxfb
+                  -no-libproxy
+                  -no-pch
+                  -no-icu                           # iconv is used instead icu
+                  -qt-zlib
+                  -qt-pcre
+                  -qt-harfbuzz
+                  -qt-xcb
+                  -qt-xkbcommon-x11
+                  -skip qt3d                        # 3D core
+                  -skip qtactiveqt                  # No need ActiveX support
+                  -skip qtandroidextras             # For embeded devices only
+                  -skip qtwinextras                 # For Windows devices only
+                  -skip qtmacextras                 # For MacOS devices only
+                  -skip qtcanvas3d                  # 3D extensions
+                  -skip qtcharts                    # No need data models charts support
+                  -skip qtconnectivity              # For embeded devices only
+                  -skip qtscript                    # No need scripting (deprecated)
+                  -skip qtdatavis3d                 # no need 3D data visualizations support
+                  -skip qtdoc                       # No need documentation
+                  -skip qtenginio                   # No need backend-as-service support
+                  -skip qtgamepad                   # No need gamepad hardware support.
+                  -skip qtgraphicaleffects          # Advanced graphical effects in GUI
+                  -skip qtlocation                  # No need geolocation
+                  -skip qtquickcontrols2            # QtQuick support for QML
+                  -skip qtmultimedia                # No need multimedia support (replaced by QtAV+ffmpeg)
+                  -skip qtnetworkauth               # No need network authentification support.
+                  -skip qtpurchasing                # No need in-app purchase of products support
+                  -skip qtremoteobjects             # No need sharing QObject properties between processes support
+                  -skip qtserialport                # No need serial port support
+                  -skip qtscxml                     # No need SCXML state machines support
+                  -skip qtsensors                   # For embeded devices only
+                  -skip qtspeech                    # No need speech synthesis support
+                  -skip qttranslations              # No need translation tools.
+                  -skip qtvirtualkeyboard           # No need virtual keyboard support
+                  -skip qtwayland                   # Specific to Linux
+                  -skip qtwebsockets                # No need websocket support
+                  -skip qtwebview                   # QML extension for QWebEngine
+                  -skip qtwebglplugin               # No need browser OpenGL extention support
+                  ${DROP_QTWEBENGINE_DEPS}
+
+
+    # Exemple of code to install only one Qt module for hacking purpose (aka qtbase here)
+    #BUILD_COMMAND cd <SOURCE_DIR> && $(MAKE) module-qtbase
+    #INSTALL_COMMAND cd <SOURCE_DIR> && $(MAKE) module-qtbase-install_subtargets
+
+    UPDATE_COMMAND ""
+    BUILD_IN_SOURCE 1
+    ALWAYS 0
+)

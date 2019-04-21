@@ -12,8 +12,18 @@ string(REPLACE "-fno-operator-names" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(libdimg_SRCS
     dimg.cpp
+    dimg_bitsops.cpp
+    dimg_colors.cpp
+    dimg_copy.cpp
+    dimg_data.cpp
+    dimg_fileio.cpp
+    dimg_metadata.cpp
+    dimg_props.cpp
+    dimg_qimage.cpp
+    dimg_qpixmap.cpp
+    dimg_scale.cpp
+    dimg_transform.cpp
     drawdecoding.cpp
-    dimgscale.cpp
     dcolor.cpp
     dcolorcomposer.cpp
     history/dimagehistory.cpp
@@ -171,7 +181,6 @@ set(libdimgloaders_SRCS
     loaders/jpegloader.cpp
     loaders/tiffloader.cpp
     loaders/rawloader.cpp
-    loaders/ppmloader.cpp
     loaders/qimageloader.cpp
     loaders/pgfloader.cpp
     loaders/jpegsettings.cpp
@@ -179,6 +188,15 @@ set(libdimgloaders_SRCS
     loaders/tiffsettings.cpp
     loaders/pgfsettings.cpp
 )
+
+# ImageMagick support
+
+if(ImageMagick_Magick++_FOUND)
+    set(libdimgloaders_SRCS
+        ${libdimgloaders_SRCS}
+        loaders/magickloader.cpp
+    )
+endif()
 
 # JPEG2000 support
 

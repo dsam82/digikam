@@ -70,7 +70,7 @@ QString FlickrPlugin::description() const
 QString FlickrPlugin::details() const
 {
     return i18n("<p>This tool permit to export items to Flickr web-service.</p>"
-                "<p>See Flickr web site for details: <a href='https://box.com/'>https://box.com/</a></p>");
+                "<p>See Flickr web site for details: <a href='https://www.flickr.com/'>https://www.flickr.com/</a></p>");
 }
 
 QList<DPluginAuthor> FlickrPlugin::authors() const
@@ -101,7 +101,7 @@ void FlickrPlugin::setup(QObject* const parent)
     ac->setText(i18nc("@action", "Export to &Flickr..."));
     ac->setObjectName(QLatin1String("export_flickr"));
     ac->setActionCategory(DPluginAction::GenericExport);
-    ac->setShortcut(Qt::ALT + Qt::SHIFT + Qt::CTRL + Qt::Key_R);
+    ac->setShortcut(Qt::CTRL + Qt::ALT + Qt::SHIFT + Qt::Key_R);
 
     connect(ac, SIGNAL(triggered(bool)),
             this, SLOT(slotFlickr()));

@@ -23,11 +23,11 @@ set(Opencv_Conf -DBUILD_EXAMPLES=OFF
                 -DBUILD_opencv_objdetect=ON
                 -DBUILD_opencv_calib3d=ON
                 -DBUILD_opencv_features2d=ON
-                -DBUILD_opencv_photo=ON
-                -DBUILD_opencv_video=ON
+                -DBUILD_opencv_flann=ON
+                -DBUILD_opencv_photo=OFF
                 -DBUILD_opencv_java=OFF
                 -DBUILD_opencv_java_bindings_generator=OFF
-                -DBUILD_opencv_js=ON
+                -DBUILD_opencv_js=OFF
                 -DBUILD_opencv_python2=OFF
                 -DBUILD_opencv_python3=OFF
                 -DBUILD_opencv_python_bindings_generator=OFF
@@ -38,10 +38,10 @@ set(Opencv_Conf -DBUILD_EXAMPLES=OFF
                 -DBUILD_opencv_stitching=OFF
                 -DBUILD_opencv_videostab=OFF
                 -DBUILD_opencv_videoio=OFF
+                -DBUILD_opencv_video=OFF
                 -DBUILD_opencv_apps=OFF
                 -DBUILD_opencv_dnn=OFF
                 -DBUILD_opencv_gapi=OFF
-                -DBUILD_opencv_flann=OFF
                 -DWITH_1394=OFF
                 -DWITH_VTK=OFF
                 -DWITH_DIRECTX=OFF
@@ -56,6 +56,7 @@ set(Opencv_Conf -DBUILD_EXAMPLES=OFF
                 -DWITH_MATLAB=OFF
                 -DWITH_OPENEXR=OFF
                 -DWITH_OPENNI=OFF
+                -DWITH_OPENMP=OFF
                 -DWITH_PNG=OFF
                 -DWITH_PVAPI=OFF
                 -DWITH_WIN32UI=OFF
@@ -147,6 +148,8 @@ else() #Linux
         URL_MD5 4002be887e8cd918486684de76a4ca7f
 
         INSTALL_DIR ${EXTPREFIX_opencv}
+
+        PATCH_COMMAND ${PATCH_COMMAND} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/opencv-mmpause-linux.patch
 
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTPREFIX_opencv}
                    -DCMAKE_BUILD_TYPE=${GLOBAL_BUILD_TYPE}
